@@ -1,0 +1,88 @@
+import QtQuick 1.1
+
+Component {
+    Rectangle {
+        id: short_mail_preview
+
+        //TODO: find a way to use them relative...
+
+        width: qp_mail_preview.width
+        height: mail_preview_column.height
+
+        color: "white"
+        radius: 5
+        clip: true
+
+        Column {
+            id: mail_preview_column
+            spacing: 5
+
+            width: parent.width
+
+            Text {
+                id: from_text
+
+                width: parent.width
+
+                text: mails.sender
+                color: "black"
+                font.pointSize: 12
+                font.bold: true
+
+                wrapMode: Text.Wrap
+                maximumLineCount: 2
+            }
+
+            Text {
+                id: subject_text
+
+                width: parent.width
+
+                text: mails.subject
+                color: "black"
+                font.pointSize: 10
+
+                wrapMode: Text.Wrap
+                maximumLineCount: 2
+            }
+
+            Text {
+                id: preview_text
+
+                width: parent.width
+
+                text: preview
+                color: "darkgrey"
+                font.pointSize: 10
+
+                wrapMode: Text.Wrap
+                maximumLineCount: 2
+            }
+
+            // just to have some kind of seperator between the mails
+            Rectangle {
+                id: bottom_spacer
+
+                width: 340
+                height: 5
+                color: "lightgrey"
+            }
+        }
+
+
+
+        MouseArea {
+             id: open_mail_mouse_area
+
+             anchors.fill: parent
+
+             onClicked: {
+
+                 // Just placeholder stuff!
+
+                 console.log("Opened your mail!")
+                 mail = 1.0
+             }
+        }
+    }
+}
