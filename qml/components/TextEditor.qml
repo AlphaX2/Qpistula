@@ -7,6 +7,9 @@ Rectangle {
     property alias editorTextSize: editor.font.pointSize
     property bool showBorder: false
 
+    width: parent.width
+    height: parent.height
+
     color: "white"
     border.color: showBorder == true ? "darkgrey" : "white"
     border.width: showBorder == true ? 1 : 0
@@ -38,7 +41,7 @@ Rectangle {
             width: editor_flicker.width
             height: editor_flicker.height
 
-            font.pointSize: 12
+            font.pixelSize: editor_window.height / 18
             textFormat: TextEdit.RichText
             wrapMode: TextEdit.WordWrap
             onCursorRectangleChanged: editor_flicker.ensureVisible(cursorRectangle)

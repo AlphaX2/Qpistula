@@ -44,7 +44,7 @@ Rectangle {
         style: Text.Outline
         styleColor: "lightgrey"
         font.bold: true
-        font.pointSize: 16
+        font.pixelSize: mail_button.height * 0.5
         color: "black"
         smooth: true
         opacity: 0.65

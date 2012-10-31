@@ -35,13 +35,22 @@ Rectangle {
 
     WriteMail {
         id: write_window
-        y: parent.y - parent.height
+        y: -height // parent.y - parent.height
         visible: false
     }
 
 
     DefaultMenu {
         id: menu
+        opacity: 0
+    }
+
+    AccountSettings {
+        id: acc_settings
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: -height
+
         opacity: 0
     }
 
@@ -56,10 +65,14 @@ Rectangle {
         State {
             name: "show_menu"
             PropertyChanges {target: menu; opacity: 0.9}
+        },
+
+        State {
+            name: "show_acc_settings"
+            PropertyChanges {target: acc_settings; opacity: 1.0 ; y: 0 }
         }
 
     ]
-
 
     transitions: [
         Transition {
@@ -84,6 +97,18 @@ Rectangle {
             from: "show_menu"
             to: ""
             NumberAnimation { properties: "opacity"; duration: 250}
+        },
+
+        Transition {
+            from: ""
+            to: "show_acc_settings"
+            NumberAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
+        },
+
+        Transition {
+            from: "show_acc_settings"
+            to: ""
+            NumberAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
         }
     ]
 }

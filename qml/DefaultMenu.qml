@@ -24,8 +24,8 @@ Rectangle {
        Column {
             id: menu_buttons
 
-            width: parent.width * 0.2
-            height: parent.height * 0.6
+            width: parent.width * 0.4
+            height: parent.height * 0.4
             anchors.centerIn: parent
 
                 Button {
@@ -42,6 +42,11 @@ Rectangle {
                     width: parent.width
                     height: parent.height * 0.15
                     buttonText: "Account settings"
+
+                    onClick: {
+                        app_window.state = ""
+                        app_window.state = "show_acc_settings"
+                    }
 
                 }
 

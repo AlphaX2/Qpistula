@@ -2,13 +2,25 @@ import QtQuick 1.1
 
 Rectangle {
     id: line
+
+    property alias echoMode: edit.echoMode
+
     width: parent.width - (parent.width * 0.1)
     height: parent.height / 5
-    color: "white"
+
+    smooth: true
     radius: 10
-    border.color: edit.activeFocus ? "steelblue" : "white"
+    border.color: edit.activeFocus ? "steelblue" : "darkgrey"
     border.width: 2
     clip: true
+
+    gradient: Gradient {
+        GradientStop {position: 0.0; color: "darkgrey"}
+        GradientStop {position: 0.1; color: "white"}
+        GradientStop {position: 0.95; color: "white"}
+        GradientStop {position: 1.0; color: "darkgrey"}
+
+    }
 
     TextInput {
         id: edit
@@ -18,7 +30,7 @@ Rectangle {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
 
-        font.pointSize: 16
+        font.pixelSize: parent.height * 0.8
         cursorVisible: false
     }
 }

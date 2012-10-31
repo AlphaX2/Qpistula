@@ -170,7 +170,7 @@ Rectangle {
             width: parent.width * 0.9
             height: parent.height * 0.9
 
-            editorTextSize: 16
+            //editorTextSize: 16
             showBorder: true
             anchors.centerIn: parent
        }
@@ -184,15 +184,15 @@ Rectangle {
 
         Button {
             id: send_mail
-            width:  main_window.width * 0.08
-            height: main_window.height * 0.08
+            width:  app_window.width * 0.08
+            height: app_window.height * 0.08
             buttonIcon: "img/document-send.png"
         }
 
         Button {
             id: cancel_send_mail
-            width:  main_window.width * 0.08
-            height: main_window.height * 0.08
+            width:  app_window.width * 0.08
+            height: app_window.height * 0.08
             buttonIcon: "img/delete.png"
             onClick: {
                 app_window.state = ""

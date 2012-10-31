@@ -69,6 +69,7 @@ Rectangle { // complete main "page"
 
                 color: "black"
                 text: ""
+                font.pixelSize: parent.height / 40
                 textFormat: Text.RichText
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }
@@ -83,8 +84,8 @@ Rectangle { // complete main "page"
 
         Button {
             id: refresh_mail_buttons
-            width:  qp_main_window.width * 0.08
-            height: qp_main_window.height * 0.08
+            width:  app_window.width * 0.08
+            height: app_window.height * 0.08
             buttonIcon: "img/mail-refresh.png"
             onClick: {mail.refresh_mails()}
         }
@@ -92,8 +93,8 @@ Rectangle { // complete main "page"
 
         Button {
             id: new_mail_button
-            width: qp_main_window.width * 0.08
-            height: qp_main_window.height * 0.08
+            width:  app_window.width * 0.08
+            height: app_window.height * 0.08
             buttonIcon: "img/document-new.png"
             onClick: {
                 if (app_window.state == "write_new_mail") { app_window.state = ""}
@@ -110,30 +111,30 @@ Rectangle { // complete main "page"
 
         Button {
             id: reply_mail_button
-            width: qp_main_window.width * 0.08
-            height: qp_main_window.height * 0.08
+            width:  app_window.width * 0.08
+            height: app_window.height * 0.08
             buttonIcon: "img/reply.png"
         }
 
         Button {
             id: forward_mail_button
-            width: qp_main_window.width * 0.08
-            height: qp_main_window.height * 0.08
+            width:  app_window.width * 0.08
+            height: app_window.height * 0.08
             buttonIcon: "img/forward.png"
         }
 
         Button {
             id: delete_mail_button
-            width: qp_main_window.width * 0.08
-            height: qp_main_window.height * 0.08
+            width:  app_window.width * 0.08
+            height: app_window.height * 0.08
             buttonIcon: "img/delete.png"
         }
     }
 
     Button {
         id: settings
-        width: qp_main_window.width * 0.08
-        height: qp_main_window.height * 0.08
+        width:  app_window.width * 0.08
+        height: app_window.height * 0.08
 
         anchors.right: qp_mail_full_content.right
         anchors.top: qp_mail_full_content.bottom

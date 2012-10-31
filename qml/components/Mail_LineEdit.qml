@@ -14,7 +14,7 @@ Rectangle {
         id: input_text
 
         text: ""
-        font.pointSize: 14
+        font.pixelSize: parent.height * 0.5
         font.bold: true
     }
 
@@ -26,7 +26,7 @@ Rectangle {
         anchors.left: input_text.right
         anchors.leftMargin: 20
 
-        font.pointSize: 14
+        font.pixelSize: parent.height * 0.5
         cursorVisible: false
     }
 
