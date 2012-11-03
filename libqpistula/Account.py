@@ -18,10 +18,15 @@ class MailAccount(QtCore.QObject):
 
         self.settings = {
                     'inbox_server_type': None, # NOT IN USE, later maybe pop/imap
+                    'mail-adress': '',
                     'inbox_username': '',
                     'inbox_password': '',
                     'inbox_server': '',
                     'inbox_use_ssl': False
+                    'smtp_server': '',
+                    'smtp_username': '',
+                    'smtp_password': '',
+                    'smtp_use_ssl': False
                     }
 
         self.signal = Signal()
@@ -39,15 +44,20 @@ class MailAccount(QtCore.QObject):
         except:
             print "ERROR: COULD NOT LOAD SETTINGS"
 
-    def save_inbox_server_settings(self, server_type='', user='', passwd='', server='', ssl=''):
+    def save_inbox_server_settings(self, server_type='', mail_adress, user='', passwd='', server='', ssl='',smtp_server= '', smtp_username='', smtp_password= '', smtp_use_ssl = False):
 
         # NOT IMPLEMENTED AT THE MOMENT, JUST FOR SETTING POP/IMAP LATER!
         self.settings['inbox_server_type'] = server_type
 
+        self.settings['mail_adress'] = mail_adress
         self.settings['inbox_username'] = user
         self.settings['inbox_password'] = passwd
         self.settings['inbox_server']   = server
         self.settings['inbox_use_ssl']  = ssl
+        self.settings['smtp_username']  = smtp_username
+        self.settings['smtp_password']  = smtp_password
+        self.settings['smtp_server']  = smtp_server
+        self.settings['smtp_use_ssl']  = smtp_use_ssl
 
         #TODO: filename related to the account name, first of all implement the different accounts
         with open(__SETTINGS_PATH__, 'w') as cfg:
@@ -79,6 +89,34 @@ class MailAccount(QtCore.QObject):
         print self.first_mail_msg
 
         self.signal.receiving_done.emit()
+
+    def send_mail(sender, destination, subject, content):
+        # typical values for text_subtype are plain, html, xml
+        text_subtype = 'plain'
+
+        if self.settings['smtp_use_ssl']:
+            # this invokes the secure SMTP protocol (port 465, uses SSL)
+            from smtplib import SMTP_SSL as SMTP 
+        else:
+            # use this for standard SMTP protocol   (port 25, no encryption)
+            from smtplib import SMTP                  
+        from email.MIMEText import MIMEText
+
+        try:
+            msg = MIMEText(content.encode('utf-8'), text_subtype, 'UTF-8')
+            msg['Subject']= subject
+            msg['From']   = self.settings['mail_adress']
+            msg['To'] = ','.join(destination)
+
+            conn = SMTP(self.settings['smtp_server'])
+            conn.set_debuglevel(False)
+            conn.login(self.settings['smtp_username'],self.settings['smtp_password'])
+            try:
+                conn.sendmail(sender, destination, msg.as_string())
+            finally:
+                conn.close()
+        except Exception, exc:
+            sys.exit( "mail failed; %s" % str(exc) ) # give a error message
 
 
     def get_mails_model(self):
