@@ -44,7 +44,7 @@ class MailAccount(QtCore.QObject):
         except:
             print "ERROR: COULD NOT LOAD SETTINGS"
 
-    def save_inbox_server_settings(self, server_type='', mail_adress, user='', passwd='', server='', ssl='',smtp_server= '', smtp_username='', smtp_password= '', smtp_use_ssl = False):
+    def save_inbox_server_settings(self, server_type='', mail_adress='', user='', passwd='', server='', ssl='',smtp_server= '', smtp_username='', smtp_password= '', smtp_use_ssl = False):
 
         # NOT IMPLEMENTED AT THE MOMENT, JUST FOR SETTING POP/IMAP LATER!
         self.settings['inbox_server_type'] = server_type
