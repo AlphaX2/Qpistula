@@ -22,7 +22,7 @@ class MailAccount(QtCore.QObject):
                     'inbox_username': '',
                     'inbox_password': '',
                     'inbox_server': '',
-                    'inbox_use_ssl': False
+                    'inbox_use_ssl': False,
                     'smtp_server': '',
                     'smtp_username': '',
                     'smtp_password': '',
