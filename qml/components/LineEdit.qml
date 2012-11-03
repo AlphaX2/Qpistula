@@ -4,6 +4,7 @@ Rectangle {
     id: line
 
     property alias echoMode: edit.echoMode
+    property alias text: edit.text
 
     width: parent.width - (parent.width * 0.1)
     height: parent.height / 5

@@ -42,7 +42,7 @@ Rectangle {
             width: parent.width
 
             Text {
-                id: username
+                id: inbox_username
 
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
@@ -51,10 +51,11 @@ Rectangle {
             }
 
             LineEdit {
-                width: (parent.width - username.width) * 0.9
+                id: inbox_username_edit
+                width: (parent.width - inbox_username.width) * 0.9
                 height: parent.height * 0.5
                 anchors.right: parent.right
-                anchors.verticalCenter: username.verticalCenter
+                anchors.verticalCenter: inbox_username.verticalCenter
             }
         }
 
@@ -64,7 +65,7 @@ Rectangle {
             width: parent.width
 
             Text {
-                id: password
+                id: inbox_password
 
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
@@ -73,10 +74,11 @@ Rectangle {
             }
 
             LineEdit {
-                width: (parent.width - username.width) * 0.9
+                id: inbox_password_edit
+                width: (parent.width - inbox_username.width) * 0.9
                 height: parent.height * 0.5
                 anchors.right: parent.right
-                anchors.verticalCenter: password.verticalCenter
+                anchors.verticalCenter: inbox_password.verticalCenter
 
                 echoMode: TextInput.Password
 
@@ -89,7 +91,7 @@ Rectangle {
             width: parent.width
 
             Text {
-                id: server
+                id: inbox_server
 
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
@@ -98,10 +100,11 @@ Rectangle {
             }
 
             LineEdit {
-                width: (parent.width - username.width) * 0.9
+                id: inbox_server_edit
+                width: (parent.width - inbox_username.width) * 0.9
                 height: parent.height * 0.5
                 anchors.right: parent.right
-                anchors.verticalCenter: server.verticalCenter
+                anchors.verticalCenter: inbox_server.verticalCenter
             }
         }
 
@@ -111,7 +114,7 @@ Rectangle {
             width: parent.width
 
             Text {
-                id: ssl
+                id: inbox_ssl
 
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
@@ -120,13 +123,14 @@ Rectangle {
             }
 
             Switch {
+                id: inbox_ssl_switch
                 height: parent.height * 0.5
                 anchors.right: parent.right
-                anchors.verticalCenter: ssl.verticalCenter
+                anchors.verticalCenter: inbox_ssl.verticalCenter
 
                 round: true
                 onStatusChanged: {
-                    console.log("haha haha haha")
+
                 }
             }
         }
@@ -142,9 +146,18 @@ Rectangle {
             id: okay
             width:  app_window.width * 0.08
             height: app_window.height * 0.08
-            buttonIcon: "img/gtk-yes.png"
+            buttonIcon: "img/yes.png"
 
             onClick: {
+                var type = "" // type is for later implementing pop/imap selection
+                var user = inbox_username_edit.text
+                var pass = inbox_password_edit.text
+                var server = inbox_server_edit.text
+                var ssl = inbox_ssl_switch.status
+
+                mail.save_inbox_server_settings(type, user, pass, server, ssl)  // saving settings via programm logic
+                mail.load_inbox_server_settings()                               // loading just a moment ago changed settings
+                mail.refresh_mails()                                            // refresh mails now with latest settings
                 app_window.state = ""
             }
         }
@@ -156,6 +169,10 @@ Rectangle {
             buttonIcon: "img/delete.png"
 
             onClick: {
+                inbox_username_edit.text = ""
+                inbox_password_edit.text = ""
+                inbox_server_edit.text = ""
+                inbox_ssl_switch.status = false
                 app_window.state = ""
             }
         }

@@ -71,8 +71,8 @@ Rectangle {
         drag.maximumX: main.width - switch_button.width
 
         onReleased: {
-            if (mouseX > 50) {switch_button.x = switch_flick.drag.maximumX; status = true}
-            if (mouseX < 50) {switch_button.x = switch_flick.drag.minimumX; status = false}
+            if (mouseX > 50) {status = true}
+            if (mouseX < 50) {status = false}
 
             // emits signal
             statusChanged()
@@ -86,7 +86,7 @@ Rectangle {
         height: parent.height * 0.94
 
         anchors.verticalCenter: main.verticalCenter
-
+        x: status == false ? 0 : switch_flick.drag.maximumX
         smooth: true
         radius: round == true ? parent.height/2 : 5
         border.color: "grey"

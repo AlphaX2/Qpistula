@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import sys
+import pickle
 import imaplib
 from PySide import QtGui, QtDeclarative, QtCore
 from libqpistula.MailWrapper import MailWrapper
@@ -29,6 +30,7 @@ class Qpistula(QtCore.QObject):
         self.context.setContextProperty('mail', mailing)
         self.view.setSource('qml/main.qml')
 
+
 class MailActions(QtCore.QObject):
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -36,9 +38,15 @@ class MailActions(QtCore.QObject):
         # Holds the first msg text for showing it at startup!
         self.first_msg = None
         self.mails_model = None
-        self.account = MailAccount(__SETTINGS_PATH__)
-        self.account.receive_mails()
+
+        self.account = MailAccount()
         self.account.signal.receiving_done.connect(self.update_ui)
+
+        try:
+            self.account.load_inbox_server_settings()
+            self.account.receive_mails()
+        except:
+            print "FEHLER: KEINE VERBINDUNG/KEIN ABRUFEN DER MAILS MÖGLICH. PRÜFEN SIE DIE EINSTELLUNGEN!!!"
 
     @QtCore.Slot()
     def refresh_mails(self):
@@ -53,6 +61,15 @@ class MailActions(QtCore.QObject):
     @QtCore.Slot(result=unicode)
     def show_first_message(self):
         return self.first_msg
+
+    @QtCore.Slot(str, str, str, str, bool)
+    def save_inbox_server_settings(self, server_type='', user='', passwd='', server='', ssl=''):
+        self.account.save_inbox_server_settings(server_type, user, passwd, server, ssl)
+
+    @QtCore.Slot()
+    def load_inbox_server_settings(self):
+        self.account.load_inbox_server_settings()
+
 
 #Starten der App
 if __name__ == '__main__':

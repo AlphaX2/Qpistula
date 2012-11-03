@@ -9,38 +9,64 @@ from imapclient import IMAPClient
 from MailWrapper import MailWrapper
 from MailListModel import MailListModel
 
+__SETTINGS_PATH__ = '/home/gabriel/Programmieren/Python/Eigene/Qpistula/devel/qpistula_login.cfg'
+
 class MailAccount(QtCore.QObject):
     ''' holds account data and manage mail actions'''
-    def __init__(self, settings_path):
+    def __init__(self):
         QtCore.QObject.__init__(self)
 
-        #if os.path.isfile(settings_path):
-        with open(settings_path) as cfg:
-            login_data = pickle.load(cfg)
-
-        # user settings
-        self.user = login_data["user"]
-        self.passwd = login_data["password"]
-        self.imap_server = login_data["server"]
-        self.use_ssl = login_data["use_ssl"]
+        self.settings = {
+                    'inbox_server_type': None, # NOT IN USE, later maybe pop/imap
+                    'inbox_username': '',
+                    'inbox_password': '',
+                    'inbox_server': '',
+                    'inbox_use_ssl': False
+                    }
 
         self.signal = Signal()
-
         self.first_mail_msg = None
         self.mails_model = None
-        self.mail_check = MailCheckThread(self.user, self.passwd, 
-                                    self.imap_server, self.use_ssl)
-        # create from server response a Qt/QML friendly model
-        self.mail_check.finished.connect(self._create_mail_model)
 
+    def load_inbox_server_settings(self):
+        '''
+        Loads your account settings from settings file.
+        '''
+        try:
+            with open(__SETTINGS_PATH__) as cfg:
+                self.settings = pickle.load(cfg)
+                print self.settings
+        except:
+            print "ERROR: COULD NOT LOAD SETTINGS"
+
+    def save_inbox_server_settings(self, server_type='', user='', passwd='', server='', ssl=''):
+
+        # NOT IMPLEMENTED AT THE MOMENT, JUST FOR SETTING POP/IMAP LATER!
+        self.settings['inbox_server_type'] = server_type
+
+        self.settings['inbox_username'] = user
+        self.settings['inbox_password'] = passwd
+        self.settings['inbox_server']   = server
+        self.settings['inbox_use_ssl']  = ssl
+
+        print self.settings
+
+        #TODO: filename related to the account name, first of all implement the different accounts
+        with open(__SETTINGS_PATH__, 'w') as cfg:
+            pickle.dump(self.settings, cfg)
 
     def receive_mails(self, folder='INBOX'):
         '''
         Call this function to start the MailCheckThread receiving latest mails.
         And connect the receivingFinished signal to update your UI!
         '''
+        self.mail_check = MailCheckThread(  self.settings["inbox_username"],
+                                            self.settings["inbox_password"],
+                                            self.settings["inbox_server"],
+                                            self.settings["inbox_use_ssl"])
+        # create from server response a Qt/QML friendly model
+        self.mail_check.finished.connect(self._create_mail_model)
         self.mails = self.mail_check.start(folder=folder)
-
 
     # When MailCheckThread finished this function creates a Qt/QML model
     def _create_mail_model(self):
