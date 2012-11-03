@@ -55,6 +55,8 @@ Rectangle { // complete main "page"
 
             width: parent.width * 0.95
             height: parent.height * 0.95
+            contentHeight: content_text.height
+            contentWidth: content_text.width
             clip: true
 
             flickableDirection: Flickable.VerticalFlick
@@ -62,17 +64,26 @@ Rectangle { // complete main "page"
             Text {
                 id: content_text
 
-                width: parent.width * 0.99
+                width: qp_mail_full_content.width * 0.95
 
                 anchors.left: parent.left
                 anchors.leftMargin: 20
 
                 color: "black"
                 text: ""
-                font.pixelSize: parent.height / 40
+                font.pixelSize: full_content_listview.height / 40
                 textFormat: Text.RichText
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }
+        }
+
+        Scrollbar {
+            id: scrollbar
+
+            anchors.right: full_content_listview.right
+            anchors.rightMargin: 10
+            width: 3
+            flickArea: full_content_listview
         }
     }
 
