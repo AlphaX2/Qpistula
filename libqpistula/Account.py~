@@ -30,8 +30,9 @@ class MailAccount(QtCore.QObject):
                     }
 
         self.signal = Signal()
-        self.first_mail_msg = None
         self.mails_model = None
+        self.mail_check = None
+        self.mail_search = None
 
     def load_inbox_server_settings(self):
         '''
@@ -84,7 +85,6 @@ class MailAccount(QtCore.QObject):
         self.signal.receiving_done.emit()
 
     def send_mail(self, destination, subject, content):
-
         # the accounts mail adress
         sender=self.settings['mail_adress']
         destination = destination.split(",") # get multiple mails adresses
@@ -116,22 +116,21 @@ class MailAccount(QtCore.QObject):
         except Exception, exc:
             sys.exit( "mail failed; %s" % str(exc) ) # give a error message
 
-
     def get_mails_model(self):
         return self.mails_model
-
-
-    def get_first_mail_msg(self):
-        return self.first_mail_msg
-
 
     def delete_mails(self, uids):
         pass
 
-
-    def search(self):
-        pass
-
+    def delete_mails(self, index): #TODO: ADD SEARCH PHRASE(S)
+        self.mail_delete = MailDeleteThread(self.settings['inbox_username'],
+                                            self.settings['inbox_password'],
+                                            self.settings['inbox_server'],
+                                            self.settings['inbox_use_ssl'],
+                                            index
+                                            )
+        self.mail_delete.finished.connect(self.receive_mails)
+        self.mail_delete.start()
 
 class MailCheckThread(QtCore.QThread):
     def __init__(self, user, passwd, imap_server, use_ssl):
@@ -142,10 +141,39 @@ class MailCheckThread(QtCore.QThread):
         self.response = {}
         self.server.login(self.user, self.passwd)
 
-
     def run(self, folder='INBOX'):
         self.server.select_folder(folder)
-        self.response = self.server.fetch('1:*', ['RFC822'])
+        # just show not deleted messages in the INBOX!
+        messages = self.server.search(['NOT DELETED'])
+        self.response = self.server.fetch(messages, ['RFC822'])
+
+
+class MailDeleteThread(QtCore.QThread):
+    def __init__(self, user, passwd, imap_server, use_ssl, index):
+        QtCore.QThread.__init__(self)
+        self.server = IMAPClient(imap_server, use_uid=True, ssl=use_ssl)
+        self.user = user
+        self.passwd = passwd
+        self.index = index
+        self.server.login(self.user, self.passwd)
+
+    def run(self):
+        self.server.select_folder('INBOX')
+        # get all messages without the "DELETED" flag they are sorted from 
+        # old->new, start with 1 and kicked out messages/elements DON'T MOVE UP!
+        messages = self.server.search(['NOT DELETED'])
+
+        # *index* is the QML listview index and sorted from new->old and beginns
+        # with 0, so add +1 to compensate that in comparison to the *messages*.
+        # Now subtract the index from the *messages* length to get number the
+        # of the clicked message in the *messages* list.
+        del_num = len(messages)-(self.index+1)
+
+        # Last step - delete/move to trash the selected message from *messages*
+        self.server.delete_messages(messages[del_num])
+
+#        self.server.expunge()  #löscht mails endgültig!
+        print "MESSAGE "+str(del_num)+" DELETED"
 
 
 class Signal(QtCore.QObject):

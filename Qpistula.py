@@ -50,7 +50,6 @@ class MailActions(QtCore.QObject):
         self.account.receive_mails()
 
     def update_ui(self):
-        self.first_msg = self.account.get_first_mail_msg()
         self.mails_model = self.account.get_mails_model()
         qpistula.context.setContextProperty('mailListModel', self.mails_model)
 
@@ -65,6 +64,10 @@ class MailActions(QtCore.QObject):
     @QtCore.Slot(str, str, str)
     def send_mail(self, destination, subject, content):
         self.account.send_mail(destination, subject, content)
+
+    @QtCore.Slot(int)
+    def delete_mails(self, index):
+        self.account.delete_mails(index)
 
 
 #Starten der App

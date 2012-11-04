@@ -180,6 +180,7 @@ Rectangle { // complete main "page"
 
             onClick: {
                 mail.delete_mails(qp_mail_preview_listview.currentIndex)
+                mail.refresh_mails()
             }
         }
     }
