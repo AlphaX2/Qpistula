@@ -7,7 +7,7 @@ Instructions:
 =============
 
 1. clone this git repo to your mashine
-2. be sure you have installed pyside-python
+2. be sure you have installed python-pyside
 3. be sure that you have =< Qt 4.7.4 (due to QtQuick 1.1)
 4. change "__SETTINGS_PATH__" in Qpistula.py to your wishes
 5. start Qpistula.py (Terminal: python Qpistula.py)
