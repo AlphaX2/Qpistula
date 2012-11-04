@@ -10,6 +10,10 @@ Rectangle {
 
     property bool details_status: false
 
+    property alias to: to_input.text
+    property alias subject: subject.text
+    property alias content: mail_editor.text
+
     Rectangle { //adress_data_window
         id: adress_data_window
 
@@ -46,7 +50,7 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
 
-                    text: "To:"
+                    descriptionText: "To:"
                 }
 
                 Mail_LineEdit {
@@ -55,7 +59,7 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
 
-                    text: "BB:"
+                    descriptionText: "BB:"
                     visible: details_status
                 }
 
@@ -65,7 +69,7 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
 
-                    text: "CC:"
+                    descriptionText: "CC:"
                     visible: details_status
                 }
 
@@ -75,7 +79,7 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
 
-                    text: "Subject:"
+                    descriptionText: "Subject:"
                 }
 
                 Button {
@@ -121,23 +125,6 @@ Rectangle {
                 }
             }
         }
-
-        //Experimenteller Schatten basierend auf der entsprechenden Komponente
-
-//        Shadow {
-//            id: adress_data_shadow
-
-//            anchors.left: adress_data_window.right
-//            height: parent.height
-//            width: 10
-
-//            gradient: Gradient {
-//                GradientStop {position: 1.0; color: "lightgrey"}
-//                GradientStop {position: 0.0; color: "darkgrey"}
-//            }
-
-//            gradientType: "LeftToRight"
-//        }
     }
 
     Rectangle { //mail_editor_window
@@ -170,7 +157,6 @@ Rectangle {
             width: parent.width * 0.9
             height: parent.height * 0.9
 
-            //editorTextSize: 16
             showBorder: true
             anchors.centerIn: parent
        }
@@ -187,6 +173,14 @@ Rectangle {
             width:  app_window.width * 0.08
             height: app_window.height * 0.08
             buttonIcon: "img/document-send.png"
+            onClick: {
+                var dest = to_input.text
+                var sub = subject.text
+                var cont = mail_editor.text
+
+                //mail.send_mail(dest, sub, cont)
+                app_window.state = ""
+            }
         }
 
         Button {

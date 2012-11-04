@@ -81,25 +81,23 @@ class MailAccount(QtCore.QObject):
         response = self.mail_check.response
         mails = [MailWrapper(response[id]['RFC822']) for id in reversed(response.keys())]
         self.mails_model = MailListModel(mails)
-
-        # getting text from lattest mail
-        length = len(response)
-        first_mail = MailWrapper(response[length]['RFC822'])
-        self.first_mail_msg = first_mail._message()
-        print self.first_mail_msg
-
         self.signal.receiving_done.emit()
 
-    def send_mail(sender, destination, subject, content):
+    def send_mail(self, destination, subject, content):
+
+        # the accounts mail adress
+        sender=self.settings['mail_adress']
+        destination = destination.split(",") # get multiple mails adresses
+
         # typical values for text_subtype are plain, html, xml
-        text_subtype = 'plain'
+        text_subtype = 'html' #'plain'
 
         if self.settings['smtp_use_ssl']:
             # this invokes the secure SMTP protocol (port 465, uses SSL)
-            from smtplib import SMTP_SSL as SMTP 
+            from smtplib import SMTP_SSL as SMTP
         else:
-            # use this for standard SMTP protocol   (port 25, no encryption)
-            from smtplib import SMTP                  
+            # use this for standard SMTP protocol (port 25, no encryption)
+            from smtplib import SMTP
         from email.MIMEText import MIMEText
 
         try:

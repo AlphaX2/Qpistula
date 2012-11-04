@@ -4,27 +4,9 @@ import "components"
 Rectangle {
     id: app_window
 
-    Component.onCompleted: {first_msg_timer.start()}
-
+    // it's scaleable via programm logic
     width: 1280
     height: 720
-
-    /*
-     there is a python function which asks for the first message text,
-     due to the time difference between showing the QML window and
-     fetching mails from server, this timer repeats as long as the mails
-     text is empty the function to set the text and stops itself when done
-    */
-
-    Timer {
-        id: first_msg_timer
-        interval: 100; running: false; repeat: true
-        onTriggered: {
-            if(main_window.mail_text == "") {main_window.mail_text = mail.show_first_message()}
-            else {first_msg_timer.stop()}
-        }
-    }
-
 
     Qpistula {
         id: main_window
@@ -38,7 +20,6 @@ Rectangle {
         y: -height // parent.y - parent.height
         visible: false
     }
-
 
     DefaultMenu {
         id: menu
@@ -69,22 +50,21 @@ Rectangle {
 
         State {
             name: "show_acc_settings"
-            PropertyChanges {target: acc_settings; opacity: 1.0 ; y: 0 }
+            PropertyChanges {target: acc_settings; opacity: 1.0; y: 0 }
         }
-
     ]
 
     transitions: [
         Transition {
             from: ""
             to: "write_new_mail"
-            NumberAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
+            PropertyAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
         },
 
         Transition {
             from: "write_new_mail"
             to: ""
-            NumberAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
+            PropertyAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
         },
 
         Transition {
@@ -102,13 +82,15 @@ Rectangle {
         Transition {
             from: ""
             to: "show_acc_settings"
-            NumberAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
+            PropertyAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
+            PropertyAnimation { properties: "opacity"; duration: 250}
         },
 
         Transition {
             from: "show_acc_settings"
             to: ""
-            NumberAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
+            PropertyAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
+            PropertyAnimation { properties: "opacity"; duration: 2000}
         }
     ]
 }

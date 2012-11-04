@@ -33,6 +33,15 @@ Rectangle { // complete main "page"
 
             delegate: Mail_Preview_Delegator{}
         }
+
+        Scrollbar {
+            id: scrollbar_list
+
+            anchors.left: qp_mail_preview_listview.left
+            anchors.leftMargin: 5
+            width: 3
+            flickArea: qp_mail_preview_listview
+        }
     }
 
     Rectangle { // full content window
@@ -70,7 +79,7 @@ Rectangle { // complete main "page"
                 anchors.leftMargin: 20
 
                 color: "black"
-                text: ""
+                text: qp_mail_preview_listview.model.get_message(qp_mail_preview_listview.currentIndex)
                 font.pixelSize: full_content_listview.height / 40
                 textFormat: Text.RichText
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -80,8 +89,7 @@ Rectangle { // complete main "page"
         Scrollbar {
             id: scrollbar
 
-            anchors.right: full_content_listview.right
-            anchors.rightMargin: 10
+            anchors.left: full_content_listview.right
             width: 3
             flickArea: full_content_listview
         }
@@ -125,6 +133,22 @@ Rectangle { // complete main "page"
             width:  app_window.width * 0.08
             height: app_window.height * 0.08
             buttonIcon: "img/reply.png"
+
+            onClick: {
+                var index = qp_mail_preview_listview.currentIndex
+                var model = qp_mail_preview_listview.model
+
+                app_window.state = "write_new_mail"
+
+                var sender = model.get_sender(index)
+                var subject = model.get_subject(index)
+                var content = model.get_message(index)
+                var date = model.get_date(index)
+
+                write_window.to = sender
+                write_window.subject = "Re: "+subject
+                write_window.content = "<br><br><br>---------------------------------<br>"+date+"<br><br>"+content
+            }
         }
 
         Button {
@@ -132,6 +156,20 @@ Rectangle { // complete main "page"
             width:  app_window.width * 0.08
             height: app_window.height * 0.08
             buttonIcon: "img/forward.png"
+
+            onClick: {
+                var index = qp_mail_preview_listview.currentIndex
+                var model = qp_mail_preview_listview.model
+
+                app_window.state = "write_new_mail"
+
+                var subject = model.get_subject(index)
+                var content = model.get_message(index)
+                var date = model.get_date(index)
+
+                write_window.subject = "Fwd: "+subject
+                write_window.content = "<br><br><br>---------------------------------<br>"+date+"<br><br>"+content
+            }
         }
 
         Button {

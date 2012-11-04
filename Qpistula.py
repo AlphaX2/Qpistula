@@ -35,10 +35,7 @@ class MailActions(QtCore.QObject):
     def __init__(self):
         QtCore.QObject.__init__(self)
 
-        # Holds the first msg text for showing it at startup!
-        self.first_msg = None
         self.mails_model = None
-
         self.account = MailAccount()
         self.account.signal.receiving_done.connect(self.update_ui)
 
@@ -46,7 +43,7 @@ class MailActions(QtCore.QObject):
             self.account.load_inbox_server_settings()
             self.account.receive_mails()
         except:
-            print "FEHLER: KEINE VERBINDUNG/KEIN ABRUFEN DER MAILS MÖGLICH. PRÜFEN SIE DIE EINSTELLUNGEN!!!"
+            print "ERROR: NO CONNECTION, CHECK YOUR SETTINGS!"
 
     @QtCore.Slot()
     def refresh_mails(self):
@@ -57,11 +54,6 @@ class MailActions(QtCore.QObject):
         self.mails_model = self.account.get_mails_model()
         qpistula.context.setContextProperty('mailListModel', self.mails_model)
 
-    # Ask for self.first_msg from QML!
-    @QtCore.Slot(result=unicode)
-    def show_first_message(self):
-        return self.first_msg
-
     @QtCore.Slot(str, str, str, str, bool)
     def save_inbox_server_settings(self, server_type='', user='', passwd='', server='', ssl=''):
         self.account.save_inbox_server_settings(server_type, user, passwd, server, ssl)
@@ -69,6 +61,10 @@ class MailActions(QtCore.QObject):
     @QtCore.Slot()
     def load_inbox_server_settings(self):
         self.account.load_inbox_server_settings()
+
+    @QtCore.Slot(str, str, str)
+    def send_mail(self, destination, subject, content):
+        self.account.send_mail(destination, subject, content)
 
 
 #Starten der App

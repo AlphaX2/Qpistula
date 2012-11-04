@@ -33,5 +33,5 @@ class MailListModel(QtCore.QAbstractListModel):
         return self._mails[int(index)]._message()
 
     @QtCore.Slot(str, result=str)
-    def get_date(self, index):
+    def get_message(self, index):
         return self._mails[int(index)]._date()

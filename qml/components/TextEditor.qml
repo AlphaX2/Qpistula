@@ -4,8 +4,10 @@ import QtQuick 1.1
 Rectangle {
     id: editor_window
 
+    property alias text: editor.text
     property alias editorTextSize: editor.font.pointSize
     property bool showBorder: false
+
 
     width: parent.width
     height: parent.height

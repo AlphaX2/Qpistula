@@ -7,14 +7,15 @@ Rectangle {
     color: "transparent"
     clip: true
 
-    property alias text: input_text.text
+    property alias descriptionText: input_text.text
+    property alias text: edit.text
     property alias bold: input_text.font.bold
 
     Text {
         id: input_text
 
         text: ""
-        font.pixelSize: parent.height * 0.5
+        font.pixelSize: parent.height * 0.3
         font.bold: true
     }
 
@@ -26,7 +27,7 @@ Rectangle {
         anchors.left: input_text.right
         anchors.leftMargin: 20
 
-        font.pixelSize: parent.height * 0.5
+        font.pixelSize: parent.height * 0.3
         cursorVisible: false
     }
 

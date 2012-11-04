@@ -100,9 +100,7 @@ Component {
 
              onClicked: {
                  mail_listview.currentIndex = index
-                 // Just placeholder stuff!
                  console.log("Opened your mail!")
-                 mail_text = mails.message
              }
         }
     }
