@@ -178,7 +178,7 @@ Rectangle {
                 var sub = subject.text
                 var cont = mail_editor.text
 
-                //mail.send_mail(dest, sub, cont)
+                mail.send_mail(dest, sub, cont)
                 app_window.state = ""
             }
         }
