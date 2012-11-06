@@ -179,7 +179,11 @@ Rectangle { // complete main "page"
             buttonIcon: "img/delete.png"
 
             onClick: {
-                mail.delete_mails(qp_mail_preview_listview.currentIndex)
+                var index = qp_mail_preview_listview.currentIndex
+                var model = qp_mail_preview_listview.model
+                var uid = model.get_uid(index)
+                console.log(uid)
+                mail.delete_mails(uid)
             }
         }
     }

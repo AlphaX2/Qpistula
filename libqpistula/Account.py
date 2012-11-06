@@ -9,7 +9,7 @@ from imapclient import IMAPClient
 from MailWrapper import MailWrapper
 from MailListModel import MailListModel
 
-__SETTINGS_PATH__ = '/home/pohlerb/qpistula_login.cfg'
+__SETTINGS_PATH__ = '/home/gabriel/Programmieren/Python/Eigene/Qpistula/devel/qpistula_login.cfg'
 
 class MailAccount(QtCore.QObject):
     ''' holds account data and manage mail actions'''
@@ -119,15 +119,12 @@ class MailAccount(QtCore.QObject):
     def get_mails_model(self):
         return self.mails_model
 
-    def delete_mails(self, uids):
-        pass
-
-    def delete_mails(self, index): #TODO: ADD SEARCH PHRASE(S)
+    def delete_mails(self, uid):
         self.mail_delete = MailDeleteThread(self.settings['inbox_username'],
                                             self.settings['inbox_password'],
                                             self.settings['inbox_server'],
                                             self.settings['inbox_use_ssl'],
-                                            index
+                                            uid
                                             )
         self.mail_delete.finished.connect(self.receive_mails)
         self.mail_delete.start()
@@ -149,31 +146,17 @@ class MailCheckThread(QtCore.QThread):
 
 
 class MailDeleteThread(QtCore.QThread):
-    def __init__(self, user, passwd, imap_server, use_ssl, index):
+    def __init__(self, user, passwd, imap_server, use_ssl, uid):
         QtCore.QThread.__init__(self)
         self.server = IMAPClient(imap_server, use_uid=True, ssl=use_ssl)
         self.user = user
         self.passwd = passwd
-        self.index = index
+        self.uid = uid
         self.server.login(self.user, self.passwd)
 
     def run(self):
         self.server.select_folder('INBOX')
-        # get all messages without the "DELETED" flag they are sorted from 
-        # old->new, start with 1 and kicked out messages/elements DON'T MOVE UP!
-        messages = self.server.search(['NOT DELETED'])
-
-        # *index* is the QML listview index and sorted from new->old and beginns
-        # with 0, so add +1 to compensate that in comparison to the *messages*.
-        # Now subtract the index from the *messages* length to get number the
-        # of the clicked message in the *messages* list.
-        del_num = len(messages)-(self.index+1)
-
-        # Last step - delete/move to trash the selected message from *messages*
-        self.server.delete_messages(messages[del_num])
-
-#        self.server.expunge()  #DELETES THE MESSAGE FOREVER SO COMMENTED OUT!
-        print "MESSAGE "+str(del_num)+" DELETED"
+        self.server.delete_messages(self.uid)
 
 
 class Signal(QtCore.QObject):

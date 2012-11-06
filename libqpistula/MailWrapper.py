@@ -17,7 +17,7 @@ class MailWrapper(QtCore.QObject):
     def _preview(self):
         return self.extract_message()[:150].decode("utf-8")
 
-    def _uid(self):
+    def _mailuid(self):
         return self._uid
 
     def _message(self):
@@ -54,5 +54,5 @@ class MailWrapper(QtCore.QObject):
     preview = QtCore.Property(unicode, _preview, notify=changed)
     date = QtCore.Property(unicode, _date, notify=changed)
     message = QtCore.Property(unicode, _message, notify=changed)
-    uid = QtCore.Property(int, _uid, notify=changed)
+    uid = QtCore.Property(int, _mailuid, notify=changed)
 

@@ -66,8 +66,10 @@ class MailActions(QtCore.QObject):
         self.account.send_mail(destination, subject, content)
 
     @QtCore.Slot(int)
-    def delete_mails(self, index):
-        self.account.delete_mails(index)
+    def delete_mails(self, uid):
+        print "delete_mails (Qpistula.py):"
+        print "uid: "+str(uid)
+        self.account.delete_mails(uid)
 
 
 #Starten der App
