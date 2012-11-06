@@ -9,7 +9,7 @@ from imapclient import IMAPClient
 from MailWrapper import MailWrapper
 from MailListModel import MailListModel
 
-__SETTINGS_PATH__ = '/home/gabriel/Programmieren/Python/Eigene/Qpistula/devel/qpistula_login.cfg'
+__SETTINGS_PATH__ = '/home/pohlerb/qpistula_login.cfg'
 
 class MailAccount(QtCore.QObject):
     ''' holds account data and manage mail actions'''
@@ -80,7 +80,7 @@ class MailAccount(QtCore.QObject):
     # When MailCheckThread finished this function creates a Qt/QML model
     def _create_mail_model(self):
         response = self.mail_check.response
-        mails = [MailWrapper(response[id]['RFC822']) for id in reversed(response.keys())]
+        mails = [MailWrapper(id,response[id]['RFC822']) for id in reversed(response.keys())]
         self.mails_model = MailListModel(mails)
         self.signal.receiving_done.emit()
 

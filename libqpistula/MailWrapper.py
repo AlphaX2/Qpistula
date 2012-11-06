@@ -3,8 +3,9 @@ import email
 import chardet
 
 class MailWrapper(QtCore.QObject):
-    def __init__(self,mail):
+    def __init__(self, uid, mail):
         QtCore.QObject.__init__(self)
+        self._uid = uid
         self._mail = email.message_from_string(mail)
 
     def _sender(self):
@@ -15,6 +16,9 @@ class MailWrapper(QtCore.QObject):
 
     def _preview(self):
         return self.extract_message()[:150].decode("utf-8")
+
+    def _uid(self):
+        return self._uid
 
     def _message(self):
         return self.extract_message().decode("utf-8")
@@ -50,4 +54,5 @@ class MailWrapper(QtCore.QObject):
     preview = QtCore.Property(unicode, _preview, notify=changed)
     date = QtCore.Property(unicode, _date, notify=changed)
     message = QtCore.Property(unicode, _message, notify=changed)
+    uid = QtCore.Property(int, _uid, notify=changed)
 
