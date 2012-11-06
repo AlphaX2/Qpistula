@@ -69,13 +69,14 @@ class MailAccount(QtCore.QObject):
         Call this function to start the MailCheckThread receiving latest mails.
         And connect the receivingFinished signal to update your UI!
         '''
-        self.mail_check = MailCheckThread(  self.settings["inbox_username"],
-                                            self.settings["inbox_password"],
-                                            self.settings["inbox_server"],
-                                            self.settings["inbox_use_ssl"])
+        self.mail_check = MailCheckDeleteThread(self.settings["inbox_username"],
+                                                self.settings["inbox_password"],
+                                                self.settings["inbox_server"],
+                                                self.settings["inbox_use_ssl"]
+                                                )
         # create from server response a Qt/QML friendly model
         self.mail_check.finished.connect(self._create_mail_model)
-        self.mails = self.mail_check.start(folder=folder)
+        self.mails = self.mail_check.start()
 
     # When MailCheckThread finished this function creates a Qt/QML model
     def _create_mail_model(self):
@@ -120,43 +121,38 @@ class MailAccount(QtCore.QObject):
         return self.mails_model
 
     def delete_mails(self, uid):
-        self.mail_delete = MailDeleteThread(self.settings['inbox_username'],
-                                            self.settings['inbox_password'],
-                                            self.settings['inbox_server'],
-                                            self.settings['inbox_use_ssl'],
-                                            uid
-                                            )
+        self.mail_delete = MailCheckDeleteThread(self.settings['inbox_username'],
+                                                 self.settings['inbox_password'],
+                                                 self.settings['inbox_server'],
+                                                 self.settings['inbox_use_ssl'],
+                                                 uid=uid
+                                                 )
         self.mail_delete.finished.connect(self.receive_mails)
         self.mail_delete.start()
 
-class MailCheckThread(QtCore.QThread):
-    def __init__(self, user, passwd, imap_server, use_ssl):
+class MailCheckDeleteThread(QtCore.QThread):
+    def __init__(self, user, passwd, imap_server, use_ssl, uid=None, folder='INBOX'):
         QtCore.QThread.__init__(self)
         self.server = IMAPClient(imap_server, use_uid=True, ssl=use_ssl)
         self.user = user
         self.passwd = passwd
+        self.server.login(self.user, self.passwd)
+
         self.response = {}
-        self.server.login(self.user, self.passwd)
-
-    def run(self, folder='INBOX'):
-        self.server.select_folder(folder)
-        # just show not deleted messages in the INBOX!
-        messages = self.server.search(['NOT DELETED'])
-        self.response = self.server.fetch(messages, ['RFC822'])
-
-
-class MailDeleteThread(QtCore.QThread):
-    def __init__(self, user, passwd, imap_server, use_ssl, uid):
-        QtCore.QThread.__init__(self)
-        self.server = IMAPClient(imap_server, use_uid=True, ssl=use_ssl)
-        self.user = user
-        self.passwd = passwd
         self.uid = uid
-        self.server.login(self.user, self.passwd)
+        self.folder = folder
 
     def run(self):
-        self.server.select_folder('INBOX')
-        self.server.delete_messages(self.uid)
+        self.server.select_folder(self.folder)
+        if not self.uid: # NO UID = NO MAIL TO DELETE
+            print "refreshing"
+            # just show not deleted messages in the INBOX!
+            messages = self.server.search(['NOT DELETED'])
+            self.response = self.server.fetch(messages, ['RFC822'])
+        if self.uid:
+            print "deleting"
+            self.server.select_folder('INBOX')
+            self.server.delete_messages(self.uid)
 
 
 class Signal(QtCore.QObject):
