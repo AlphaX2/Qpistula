@@ -13,7 +13,7 @@ from libqpistula.Account import MailAccount
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-__SETTINGS_PATH__ = '/home/gabriel/Programmieren/Python/Eigene/Qpistula/devel/qpistula_login.cfg'
+#__SETTINGS_PATH__ = '/home/gabriel/Programmieren/Python/Eigene/Qpistula/devel/qpistula_login.cfg'
 
 class Qpistula(QtCore.QObject):
     def __init__(self):
@@ -40,7 +40,7 @@ class MailActions(QtCore.QObject):
         self.account.signal.receiving_done.connect(self.update_ui)
 
         try:
-            self.account.load_inbox_server_settings()
+            #self.account.load_inbox_server_settings()
             self.account.receive_mails()
         except:
             print "ERROR: NO CONNECTION, CHECK YOUR SETTINGS!"

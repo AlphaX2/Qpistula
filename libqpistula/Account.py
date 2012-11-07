@@ -1,7 +1,10 @@
 #-*- coding: utf-8 -*-
 
 import os
+import sys
 import pickle
+import ConfigParser
+
 
 from PySide import QtCore
 from imapclient import IMAPClient
@@ -9,71 +12,86 @@ from imapclient import IMAPClient
 from MailWrapper import MailWrapper
 from MailListModel import MailListModel
 
-__SETTINGS_PATH__ = '/home/gabriel/Programmieren/Python/Eigene/Qpistula/devel/qpistula_login.cfg'
+#__SETTINGS_PATH__ = '/home/gabriel/Programmieren/Python/Eigene/Qpistula/devel/qpistula_login.cfg'
 
 class MailAccount(QtCore.QObject):
     ''' holds account data and manage mail actions'''
     def __init__(self):
         QtCore.QObject.__init__(self)
 
-        self.settings = {
-                    'inbox_server_type': None, # NOT IN USE, later maybe pop/imap
-                    'mail-adress': '',
-                    'inbox_username': '',
-                    'inbox_password': '',
-                    'inbox_server': '',
-                    'inbox_use_ssl': False,
-                    'smtp_server': '',
-                    'smtp_username': '',
-                    'smtp_password': '',
-                    'smtp_use_ssl': False
-                    }
-
-        self.signal = Signal()
         self.mails_model = None
         self.mail_check = None
         self.mail_search = None
+        self.account_name = 'Mein Account'
 
-    def load_inbox_server_settings(self):
-        '''
-        Loads your account settings from settings file.
-        '''
-        try:
-            with open(__SETTINGS_PATH__) as cfg:
-                self.settings = pickle.load(cfg)
-                print self.settings
-        except:
-            print "ERROR: COULD NOT LOAD SETTINGS"
+        self.signal = Signal()
+        self.settings = ConfigParser.ConfigParser()
+
+        if os.path.exists(os.path.expanduser('~/.config/qpistula.cfg')):
+            print "config existiert"
+            self.read_conf()
+        else:
+            print "config existiert nicht, lege plain config file an"
+            # should be replaced by popup settings-dialog
+            self.default_conf()
+            self.read_conf()
+
+    def save_conf(self):
+        with open(os.path.expanduser('~/.config/qpistula.cfg'), 'wb') as configfile:
+            self.settings.write(configfile)            
+
+    def read_conf(self):
+        self.settings.readfp(open(os.path.expanduser('~/.config/qpistula.cfg'), 'rwb'))
+        self.inbox_server_type = self.settings.get(self.account_name,'inbox_server_type')
+        self.mail_adress = self.settings.get(self.account_name, 'mail_adress')
+        self.inbox_username = self.settings.get(self.account_name, 'inbox_username')
+        self.inbox_password = self.settings.get(self.account_name, 'inbox_password')
+        self.inbox_server = self.settings.get(self.account_name, 'inbox_server')
+        self.inbox_use_ssl = self.settings.getboolean(self.account_name, 'inbox_use_ssl')
+        self.smtp_server = self.settings.get(self.account_name, 'smtp_server')
+        self.smtp_username = self.settings.get(self.account_name, 'smtp_username')
+        self.smtp_password = self.settings.get(self.account_name, 'smtp_password', '')
+        self.smtp_use_ssl = self.settings.get(self.account_name, 'smtp_use_ssl', 'False')
+        self.update_interval = self.settings.getint(self.account_name, 'update_interval')
+
+    # to generate plain config-file, should be deleted when settings dialog works
+    def default_conf(self):
+        self.settings.add_section(self.account_name)
+        self.settings.set(self.account_name, 'inbox_server_type', 'None')
+        self.settings.set(self.account_name, 'mail_adress', '')
+        self.settings.set(self.account_name, 'inbox_username', '')
+        self.settings.set(self.account_name, 'inbox_password', '')
+        self.settings.set(self.account_name, 'inbox_server', '')
+        self.settings.set(self.account_name, 'inbox_use_ssl', 'False')
+        self.settings.set(self.account_name, 'smtp_server', '')
+        self.settings.set(self.account_name, 'smtp_username', '')
+        self.settings.set(self.account_name, 'smtp_password', '')
+        self.settings.set(self.account_name, 'smtp_use_ssl', 'False')
+        self.settings.set(self.account_name, 'update_interval','10')
+        self.save_conf()
 
     def save_inbox_server_settings(self, server_type='', mail_adress='', user='', passwd='', server='', ssl='',smtp_server= '', smtp_username='', smtp_password= '', smtp_use_ssl = False):
 
-        # NOT IMPLEMENTED AT THE MOMENT, JUST FOR SETTING POP/IMAP LATER!
-        self.settings['inbox_server_type'] = server_type
-
-        self.settings['mail_adress'] = mail_adress
-        self.settings['inbox_username'] = user
-        self.settings['inbox_password'] = passwd
-        self.settings['inbox_server']   = server
-        self.settings['inbox_use_ssl']  = ssl
-        self.settings['smtp_username']  = smtp_username
-        self.settings['smtp_password']  = smtp_password
-        self.settings['smtp_server']  = smtp_server
-        self.settings['smtp_use_ssl']  = smtp_use_ssl
-
-        #TODO: filename related to the account name, first of all implement the different accounts
-        with open(__SETTINGS_PATH__, 'w') as cfg:
-            pickle.dump(self.settings, cfg)
+        self.settings.set(self.account_name, 'inbox_server_type', server_type)
+        self.settings.set(self.account_name, 'mail-adress', mail_adress)
+        self.settings.set(self.account_name, 'inbox_username', user)
+        self.settings.set(self.account_name, 'inbox_password', passwd)
+        self.settings.set(self.account_name, 'inbox_server', server)
+        self.settings.set(self.account_name, 'inbox_use_ssl', ssl)
+        self.settings.set(self.account_name, 'smtp_server', smtp_server)
+        self.settings.set(self.account_name, 'smtp_username', smtp_username)
+        self.settings.set(self.account_name, 'smtp_password', smtp_password)
+        self.settings.set(self.account_name, 'smtp_use_ssl', smtp_use_ssl)
+        self.save_conf()
+        
 
     def receive_mails(self, folder='INBOX'):
         '''
         Call this function to start the MailCheckThread receiving latest mails.
         And connect the receivingFinished signal to update your UI!
         '''
-        self.mail_check = MailCheckDeleteThread(self.settings["inbox_username"],
-                                                self.settings["inbox_password"],
-                                                self.settings["inbox_server"],
-                                                self.settings["inbox_use_ssl"]
-                                                )
+        self.mail_check = MailCheckDeleteThread(self.inbox_username, self.inbox_password,
+                                                self.inbox_server, self.inbox_use_ssl)
         # create from server response a Qt/QML friendly model
         self.mail_check.finished.connect(self._create_mail_model)
         self.mails = self.mail_check.start()
@@ -87,13 +105,13 @@ class MailAccount(QtCore.QObject):
 
     def send_mail(self, destination, subject, content):
         # the accounts mail adress
-        sender=self.settings['mail_adress']
+        sender=self.mail_adress
         destination = destination.split(",") # get multiple mails adresses
 
         # typical values for text_subtype are plain, html, xml
         text_subtype = 'html' #'plain'
 
-        if self.settings['smtp_use_ssl']:
+        if self.smtp_use_ssl:
             # this invokes the secure SMTP protocol (port 465, uses SSL)
             from smtplib import SMTP_SSL as SMTP
         else:
@@ -104,12 +122,12 @@ class MailAccount(QtCore.QObject):
         try:
             msg = MIMEText(content.encode('utf-8'), text_subtype, 'UTF-8')
             msg['Subject']= subject
-            msg['From']   = self.settings['mail_adress']
+            msg['From']   = sender
             msg['To'] = ','.join(destination)
 
-            conn = SMTP(self.settings['smtp_server'])
+            conn = SMTP(self.smtp_server)
             conn.set_debuglevel(False)
-            conn.login(self.settings['smtp_username'],self.settings['smtp_password'])
+            conn.login(self.smtp_username,self.smtp_password)
             try:
                 conn.sendmail(sender, destination, msg.as_string())
             finally:
@@ -121,12 +139,9 @@ class MailAccount(QtCore.QObject):
         return self.mails_model
 
     def delete_mails(self, uid):
-        self.mail_delete = MailCheckDeleteThread(self.settings['inbox_username'],
-                                                 self.settings['inbox_password'],
-                                                 self.settings['inbox_server'],
-                                                 self.settings['inbox_use_ssl'],
-                                                 uid=uid
-                                                 )
+        self.mail_delete = MailCheckDeleteThread(self.inbox_username, self.inbox_password,
+                                                 self.inbox_server, self.inbox_use_ssl,
+                                                 uid=uid)
         self.mail_delete.finished.connect(self.receive_mails)
         self.mail_delete.start()
 
