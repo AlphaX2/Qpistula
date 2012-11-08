@@ -13,8 +13,6 @@ from libqpistula.Account import MailAccount
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-#__SETTINGS_PATH__ = '/home/gabriel/Programmieren/Python/Eigene/Qpistula/devel/qpistula_login.cfg'
-
 class Qpistula(QtCore.QObject):
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -40,7 +38,6 @@ class MailActions(QtCore.QObject):
         self.account.signal.receiving_done.connect(self.update_ui)
 
         try:
-            #self.account.load_inbox_server_settings()
             self.account.receive_mails()
         except:
             print "ERROR: NO CONNECTION, CHECK YOUR SETTINGS!"
@@ -53,13 +50,36 @@ class MailActions(QtCore.QObject):
         self.mails_model = self.account.get_mails_model()
         qpistula.context.setContextProperty('mailListModel', self.mails_model)
 
-    @QtCore.Slot(str, str, str, str, bool)
-    def save_server_settings(self, server_type='', user='', passwd='', server='', ssl=''):
-        self.account.save_server_settings(server_type, user, passwd, server, ssl)
+    @QtCore.Slot(str, str, str, str, str, bool, str, str, str, bool)
+    def save_server_settings(self, server_type='', mail_adress='',
+                            inbox_user='', inbox_passwd='',
+                            inbox_server='', inbox_use_ssl='',
+                            outbox_user='', outbox_passwd='',
+                            outbox_server='', outbox_use_ssl=''):
+
+        self.account.save_server_settings(  server_type,
+                                            mail_adress,
+                                            inbox_user,
+                                            inbox_passwd,
+                                            inbox_server,
+                                            inbox_use_ssl,
+                                            outbox_user,
+                                            outbox_passwd,
+                                            outbox_server,
+                                            outbox_use_ssl
+                                            )
+
+    @QtCore.Slot(result=str)
+    def get_conf_for_gui(self):
+        # Due to a PySide bug it's not possible to set result to a list, so just
+        # give QML a string and split it via JavaScript in QML!
+        conf_list = self.account.get_conf()
+        conf_string =  ','.join(str(i) for i in conf_list)
+        return conf_string
 
     @QtCore.Slot()
-    def load_inbox_server_settings(self):
-        self.account.load_inbox_server_settings()
+    def load_server_settings(self):
+        self.account.read_conf()
 
     @QtCore.Slot(str, str, str)
     def send_mail(self, destination, subject, content):

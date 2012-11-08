@@ -4,8 +4,28 @@ import "components"
 Rectangle {
     id: settings_window
 
-    width: 512 //parent.width * 0.4
-    height: 432 //parent.height * 0.6
+    width: parent.width * 0.4
+    height: parent.height * 0.8
+
+    Component.onCompleted: {
+        var conf_str = mail.get_conf_for_gui()
+        var conf_list = conf_str.split(',')
+
+        mail_name_edit.text = conf_list[1]
+        inbox_username_edit.text = conf_list[2]
+        inbox_password_edit.text = conf_list[3]
+        inbox_server_edit.text = conf_list[4]
+
+        if (conf_list[5] === "True") {inbox_ssl_switch.status = true}
+        else {inbox_ssl_switch.status = false}
+
+        outbox_username_edit.text = conf_list[6]
+        outbox_password_edit.text = conf_list[7]
+        outbox_server_edit.text = conf_list[8]
+
+        if (conf_list[9] === "True") {outbox_ssl_switch.status = true}
+        else {outbox_ssl_switch.status = false}
+    }
 
     radius: 10
 
@@ -25,14 +45,43 @@ Rectangle {
         font.bold: true
     }
 
+
+    Item {
+
+        height: parent.height / 9
+        width: parent.width * 0.9
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: title.bottom
+
+        Text {
+            id: mail_name
+
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Mail adress:"
+            font.pixelSize: parent.height / 4
+        }
+
+        LineEdit {
+            id: mail_name_edit
+            width: (parent.width - inbox_username.width) * 0.9
+            height: parent.height * 0.5
+            anchors.right: parent.right
+            anchors.verticalCenter: mail_name.verticalCenter
+        }
+    }
+
     Rectangle {
         id: tab_window
 
         width: parent.width
-        height: parent.height * 0.8
+        height: parent.height * 0.7
 
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 10
+
+        border.color: "darkgrey"
+        border.width: 1
 
         color: "lightgrey"
 
@@ -42,7 +91,7 @@ Rectangle {
             width: parent.width / 2
             height: parent.height * 0.1
 
-            anchors.bottom: tab_window.top
+            anchors.top: tab_window.top
 
             color: "lightgrey"
             border.color: "darkgrey"
@@ -71,7 +120,7 @@ Rectangle {
             width: parent.width / 2
             height: parent.height * 0.1
 
-            anchors.bottom: tab_window.top
+            anchors.top: tab_window.top
             anchors.left: inbox_server_settings.right
 
             color: "darkgrey"
@@ -100,9 +149,9 @@ Rectangle {
             id: inbox_elements_column
 
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: tab_window.top
+            anchors.bottom: parent.bottom
 
-            height: parent.height * 0.8
+            height: parent.height - inbox_server_settings.height
             width: parent.width * 0.9
 
 
@@ -210,10 +259,9 @@ Rectangle {
             id: outbox_elements_column
 
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: tab_window.top
-            //anchors.fill: tab_window
+            anchors.bottom: parent.bottom
 
-            height: parent.height * 0.8
+            height: parent.height - inbox_server_settings.height
             width: parent.width * 0.9
 
             visible: false
@@ -320,10 +368,12 @@ Rectangle {
     }
 
     Row {
+        id: yes_no_button_row
         height: children.height
         width: children.width
         anchors.horizontalCenter: settings_window.horizontalCenter
-        anchors.bottom: tab_window.bottom
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 10
 
         Button {
             id: okay
@@ -332,15 +382,39 @@ Rectangle {
             buttonIcon: "img/yes.png"
 
             onClick: {
-                var type = "" // type is for later implementing pop/imap selection
-                var user = inbox_username_edit.text
-                var pass = inbox_password_edit.text
-                var server = inbox_server_edit.text
-                var ssl = inbox_ssl_switch.status
+                var type = "imap" // type is for later implementing pop/imap selection
+                var mailname = mail_name_edit.text // mail should hold mail adress
 
-                mail.save_inbox_server_settings(type, user, pass, server, ssl)  // saving settings via programm logic
-                mail.load_inbox_server_settings()                               // loading just a moment ago changed settings
-                mail.refresh_mails()                                            // refresh mails now with latest settings
+                var in_user = inbox_username_edit.text
+                var in_pass = inbox_password_edit.text
+                var in_server = inbox_server_edit.text
+                var in_ssl = inbox_ssl_switch.status
+
+                var out_user = outbox_username_edit.text
+                var out_pass = outbox_password_edit.text
+                var out_server = outbox_server_edit.text
+                var out_ssl = outbox_ssl_switch.status
+
+                // saving settings via programm logic
+                mail.save_server_settings(type,
+                                          mailname,
+
+                                          in_user,
+                                          in_pass,
+                                          in_server,
+                                          in_ssl,
+
+                                          out_user,
+                                          out_pass,
+                                          out_server,
+                                          out_ssl)
+
+                // loading just a moment ago changed settings
+                mail.load_server_settings()
+
+                // refresh mails now with latest settings
+                mail.refresh_mails()
+
                 app_window.state = ""
             }
         }
@@ -356,6 +430,12 @@ Rectangle {
                 inbox_password_edit.text = ""
                 inbox_server_edit.text = ""
                 inbox_ssl_switch.status = false
+
+                outbox_username_edit.text = ""
+                outbox_password_edit.text = ""
+                outbox_server_edit.text = ""
+                outbox_ssl_switch.status = false
+
                 app_window.state = ""
             }
         }

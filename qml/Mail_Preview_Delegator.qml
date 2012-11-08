@@ -100,8 +100,7 @@ Component {
 
              onClicked: {
                  mail_listview.currentIndex = index
-                 //console.log(mail_listview.currentIndex)
-                 //console.log("mail uid: " +mails.uid)
+                 console.log(mails.message)
              }
         }
     }

@@ -6,8 +6,8 @@ Rectangle {
     property alias echoMode: edit.echoMode
     property alias text: edit.text
 
-    width: parent.width - (parent.width * 0.1)
-    height: parent.height / 5
+    width: parent.width * 0.9
+    height: 60 //parent.height / 5
 
     smooth: true
     radius: 10

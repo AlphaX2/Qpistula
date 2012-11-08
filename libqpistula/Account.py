@@ -12,8 +12,6 @@ from imapclient import IMAPClient
 from MailWrapper import MailWrapper
 from MailListModel import MailListModel
 
-#__SETTINGS_PATH__ = '/home/gabriel/Programmieren/Python/Eigene/Qpistula/devel/qpistula_login.cfg'
-
 class MailAccount(QtCore.QObject):
     ''' holds account data and manage mail actions'''
     def __init__(self):
@@ -38,7 +36,7 @@ class MailAccount(QtCore.QObject):
 
     def save_conf(self):
         with open(os.path.expanduser('~/.config/qpistula.cfg'), 'wb') as configfile:
-            self.settings.write(configfile)            
+            self.settings.write(configfile)
 
     def read_conf(self):
         self.settings.readfp(open(os.path.expanduser('~/.config/qpistula.cfg'), 'rwb'))
@@ -70,9 +68,9 @@ class MailAccount(QtCore.QObject):
         self.settings.set(self.account_name, 'update_interval','10')
         self.save_conf()
 
-    def save_server_settings(self, server_type='', mail_adress='', user='', passwd='', server='', ssl='',smtp_server= '', smtp_username='', smtp_password= '', smtp_use_ssl = False):
+    def save_server_settings(self, server_type='', mail_adress='', user='', passwd='', server='', ssl='', smtp_username='', smtp_password= '', smtp_server= '', smtp_use_ssl = False):
         self.settings.set(self.account_name, 'inbox_server_type', server_type)
-        self.settings.set(self.account_name, 'mail-adress', mail_adress)
+        self.settings.set(self.account_name, 'mail_adress', mail_adress)
         self.settings.set(self.account_name, 'inbox_username', user)
         self.settings.set(self.account_name, 'inbox_password', passwd)
         self.settings.set(self.account_name, 'inbox_server', server)
@@ -82,7 +80,21 @@ class MailAccount(QtCore.QObject):
         self.settings.set(self.account_name, 'smtp_password', smtp_password)
         self.settings.set(self.account_name, 'smtp_use_ssl', smtp_use_ssl)
         self.save_conf()
-        
+
+    def get_conf(self):
+        server_type = self.inbox_server_type
+        adress = self.mail_adress
+        in_user = self.inbox_username
+        in_pass = self.inbox_password
+        in_server = self.inbox_server
+        in_ssl = self.inbox_use_ssl
+        out_server = self.smtp_server
+        out_user = self.smtp_username
+        out_pass = self.smtp_password
+        out_ssl  = self.smtp_use_ssl
+
+        conf_list = [server_type, adress, in_user, in_pass, in_server, in_ssl, out_user, out_pass, out_server, out_ssl]
+        return conf_list
 
     def receive_mails(self, folder='INBOX'):
         '''
@@ -126,7 +138,7 @@ class MailAccount(QtCore.QObject):
 
             conn = SMTP(self.smtp_server)
             conn.set_debuglevel(False)
-            conn.login(self.smtp_username,self.smtp_password)
+            conn.login(self.smtp_username, self.smtp_password)
             try:
                 conn.sendmail(sender, destination, msg.as_string())
             finally:

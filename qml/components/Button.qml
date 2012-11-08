@@ -7,6 +7,7 @@ Rectangle {
     property alias buttonHeight: mail_button.height
     property alias buttonIcon: button_img.source
     property alias buttonText: button_text.text
+    property alias buttonTextSize: button_text.font.pixelSize
 
     signal click
 
@@ -44,7 +45,7 @@ Rectangle {
         style: Text.Outline
         styleColor: "lightgrey"
         font.bold: true
-        font.pixelSize: mail_button.height * 0.5
+        font.pixelSize: mail_button.height * 0.4
         color: "black"
         smooth: true
         opacity: 0.65

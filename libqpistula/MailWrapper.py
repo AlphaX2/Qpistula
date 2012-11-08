@@ -27,7 +27,7 @@ class MailWrapper(QtCore.QObject):
         text = ""
         msg = self._mail
         if msg.is_multipart():
-            html = None
+            html = True #None
             for part in msg.get_payload():
                 if part.get_content_charset() is None:
                     charset = chardet.detect(str(part))['encoding']
