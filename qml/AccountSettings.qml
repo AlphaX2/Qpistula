@@ -4,8 +4,8 @@ import "components"
 Rectangle {
     id: settings_window
 
-    width: parent.width * 0.4
-    height: parent.height * 0.6
+    width: 512 //parent.width * 0.4
+    height: 432 //parent.height * 0.6
 
     radius: 10
 
@@ -18,119 +18,302 @@ Rectangle {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 20
+        anchors.topMargin: 5
 
         text: "Account Settings"
-        font.pixelSize: parent.height * 0.08
+        font.pixelSize: parent.height * 0.06
         font.bold: true
     }
 
-    Column {
-        id: elements_column
+    Rectangle {
+        id: tab_window
 
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: title.bottom
-        anchors.topMargin: 20
-
+        width: parent.width
         height: parent.height * 0.8
-        width: parent.width * 0.9
 
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 10
 
-        Item {
+        color: "lightgrey"
 
-            height: parent.height / 5
-            width: parent.width
+        Rectangle {
+            id: inbox_server_settings
+
+            width: parent.width / 2
+            height: parent.height * 0.1
+
+            anchors.bottom: tab_window.top
+
+            color: "lightgrey"
+            border.color: "darkgrey"
+            border.width: 1
 
             Text {
-                id: inbox_username
-
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: "Username:"
-                font.pixelSize: parent.height / 4
+                id: inbox_tab_text
+                anchors.centerIn: parent
+                text: "Inbox server settings"
+                color: "black"
             }
 
-            LineEdit {
-                id: inbox_username_edit
-                width: (parent.width - inbox_username.width) * 0.9
-                height: parent.height * 0.5
-                anchors.right: parent.right
-                anchors.verticalCenter: inbox_username.verticalCenter
+            MouseArea {
+                anchors.fill: parent
+
+                onClicked: {inbox_server_settings.color = "lightgrey"; outbox_server_settings.color = "darkgrey";
+                            inbox_tab_text.color = "black"; outbox_tab_text.color = "grey"
+                            outbox_elements_column.visible = false; inbox_elements_column.visible = true
+                }
             }
         }
 
-        Item {
+        Rectangle {
+            id: outbox_server_settings
 
-            height: parent.height / 5
-            width: parent.width
+            width: parent.width / 2
+            height: parent.height * 0.1
+
+            anchors.bottom: tab_window.top
+            anchors.left: inbox_server_settings.right
+
+            color: "darkgrey"
+            border.color: "darkgrey"
+            border.width: 1
 
             Text {
-                id: inbox_password
-
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: "Password:"
-                font.pixelSize: parent.height / 4
+                id: outbox_tab_text
+                anchors.centerIn: parent
+                text: "Outbox server settings"
+                color: "grey"
             }
 
-            LineEdit {
-                id: inbox_password_edit
-                width: (parent.width - inbox_username.width) * 0.9
-                height: parent.height * 0.5
-                anchors.right: parent.right
-                anchors.verticalCenter: inbox_password.verticalCenter
+            MouseArea {
+                anchors.fill: parent
 
-                echoMode: TextInput.Password
-
+                onClicked: {outbox_server_settings.color = "lightgrey"; inbox_server_settings.color = "darkgrey";
+                            outbox_tab_text.color = "black"; inbox_tab_text.color = "grey"
+                            inbox_elements_column.visible = false; outbox_elements_column.visible = true
+                }
             }
         }
 
-        Item {
 
-            height: parent.height / 5
-            width: parent.width
+        Column {
+            id: inbox_elements_column
 
-            Text {
-                id: inbox_server
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: tab_window.top
 
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: "IMAP server:"
-                font.pixelSize: parent.height / 4
+            height: parent.height * 0.8
+            width: parent.width * 0.9
+
+
+            Item {
+
+                height: parent.height / 5
+                width: parent.width
+
+                Text {
+                    id: inbox_username
+
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Username:"
+                    font.pixelSize: parent.height / 4
+                }
+
+                LineEdit {
+                    id: inbox_username_edit
+                    width: (parent.width - inbox_username.width) * 0.9
+                    height: parent.height * 0.5
+                    anchors.right: parent.right
+                    anchors.verticalCenter: inbox_username.verticalCenter
+                }
             }
 
-            LineEdit {
-                id: inbox_server_edit
-                width: (parent.width - inbox_username.width) * 0.9
-                height: parent.height * 0.5
-                anchors.right: parent.right
-                anchors.verticalCenter: inbox_server.verticalCenter
+            Item {
+
+                height: parent.height / 5
+                width: parent.width
+
+                Text {
+                    id: inbox_password
+
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Password:"
+                    font.pixelSize: parent.height / 4
+                }
+
+                LineEdit {
+                    id: inbox_password_edit
+                    width: (parent.width - inbox_username.width) * 0.9
+                    height: parent.height * 0.5
+                    anchors.right: parent.right
+                    anchors.verticalCenter: inbox_password.verticalCenter
+
+                    echoMode: TextInput.Password
+
+                }
+            }
+
+            Item {
+
+                height: parent.height / 5
+                width: parent.width
+
+                Text {
+                    id: inbox_server
+
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "IMAP server:"
+                    font.pixelSize: parent.height / 4
+                }
+
+                LineEdit {
+                    id: inbox_server_edit
+                    width: (parent.width - inbox_username.width) * 0.9
+                    height: parent.height * 0.5
+                    anchors.right: parent.right
+                    anchors.verticalCenter: inbox_server.verticalCenter
+                }
+            }
+
+            Item {
+
+                height: parent.height / 5
+                width: parent.width
+
+                Text {
+                    id: inbox_ssl
+
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Use SSL:"
+                    font.pixelSize: parent.height / 4
+                }
+
+                Switch {
+                    id: inbox_ssl_switch
+                    height: parent.height * 0.5
+                    anchors.right: parent.right
+                    anchors.verticalCenter: inbox_ssl.verticalCenter
+
+                    round: true
+                    onStatusChanged: {
+
+                    }
+                }
             }
         }
 
-        Item {
+        Column {
+            id: outbox_elements_column
 
-            height: parent.height / 5
-            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: tab_window.top
+            //anchors.fill: tab_window
 
-            Text {
-                id: inbox_ssl
+            height: parent.height * 0.8
+            width: parent.width * 0.9
 
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: "Use SSL:"
-                font.pixelSize: parent.height / 4
+            visible: false
+
+            Item {
+
+                height: parent.height / 5
+                width: parent.width
+
+                Text {
+                    id: outbox_username
+
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Username:"
+                    font.pixelSize: parent.height / 4
+                }
+
+                LineEdit {
+                    id: outbox_username_edit
+                    width: (parent.width - outbox_username.width) * 0.9
+                    height: parent.height * 0.5
+                    anchors.right: parent.right
+                    anchors.verticalCenter: outbox_username.verticalCenter
+                }
             }
 
-            Switch {
-                id: inbox_ssl_switch
-                height: parent.height * 0.5
-                anchors.right: parent.right
-                anchors.verticalCenter: inbox_ssl.verticalCenter
+            Item {
 
-                round: true
-                onStatusChanged: {
+                height: parent.height / 5
+                width: parent.width
 
+                Text {
+                    id: outbox_password
+
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Password:"
+                    font.pixelSize: parent.height / 4
+                }
+
+                LineEdit {
+                    id: outbox_password_edit
+                    width: (parent.width - outbox_username.width) * 0.9
+                    height: parent.height * 0.5
+                    anchors.right: parent.right
+                    anchors.verticalCenter: outbox_password.verticalCenter
+
+                    echoMode: TextInput.Password
+
+                }
+            }
+
+            Item {
+
+                height: parent.height / 5
+                width: parent.width
+
+                Text {
+                    id: outbox_server
+
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "SMTP server:"
+                    font.pixelSize: parent.height / 4
+                }
+
+                LineEdit {
+                    id: outbox_server_edit
+                    width: (parent.width - outbox_username.width) * 0.9
+                    height: parent.height * 0.5
+                    anchors.right: parent.right
+                    anchors.verticalCenter: outbox_server.verticalCenter
+                }
+            }
+
+            Item {
+
+                height: parent.height / 5
+                width: parent.width
+
+                Text {
+                    id: outbox_ssl
+
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Use SSL:"
+                    font.pixelSize: parent.height / 4
+                }
+
+                Switch {
+                    id: outbox_ssl_switch
+                    height: parent.height * 0.5
+                    anchors.right: parent.right
+                    anchors.verticalCenter: outbox_ssl.verticalCenter
+
+                    round: true
+                    onStatusChanged: {
+
+                    }
                 }
             }
         }
@@ -140,7 +323,7 @@ Rectangle {
         height: children.height
         width: children.width
         anchors.horizontalCenter: settings_window.horizontalCenter
-        anchors.bottom: settings_window.bottom
+        anchors.bottom: tab_window.bottom
 
         Button {
             id: okay

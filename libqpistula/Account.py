@@ -70,8 +70,7 @@ class MailAccount(QtCore.QObject):
         self.settings.set(self.account_name, 'update_interval','10')
         self.save_conf()
 
-    def save_inbox_server_settings(self, server_type='', mail_adress='', user='', passwd='', server='', ssl='',smtp_server= '', smtp_username='', smtp_password= '', smtp_use_ssl = False):
-
+    def save_server_settings(self, server_type='', mail_adress='', user='', passwd='', server='', ssl='',smtp_server= '', smtp_username='', smtp_password= '', smtp_use_ssl = False):
         self.settings.set(self.account_name, 'inbox_server_type', server_type)
         self.settings.set(self.account_name, 'mail-adress', mail_adress)
         self.settings.set(self.account_name, 'inbox_username', user)

@@ -54,8 +54,8 @@ class MailActions(QtCore.QObject):
         qpistula.context.setContextProperty('mailListModel', self.mails_model)
 
     @QtCore.Slot(str, str, str, str, bool)
-    def save_inbox_server_settings(self, server_type='', user='', passwd='', server='', ssl=''):
-        self.account.save_inbox_server_settings(server_type, user, passwd, server, ssl)
+    def save_server_settings(self, server_type='', user='', passwd='', server='', ssl=''):
+        self.account.save_server_settings(server_type, user, passwd, server, ssl)
 
     @QtCore.Slot()
     def load_inbox_server_settings(self):
