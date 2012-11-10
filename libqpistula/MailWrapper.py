@@ -6,10 +6,17 @@ from email.header import decode_header
 from email.iterators import body_line_iterator, _structure
 
 class MailWrapper(QtCore.QObject):
-    def __init__(self, uid, mail):
+    def __init__(self, uid, unseen, mail):
         QtCore.QObject.__init__(self)
         self._uid = uid
+
+        if uid in unseen:
+            self._unseen = True
+        else:
+            self._unseen = False
+
         self._mail = email.message_from_string(mail)
+
 
     def _sender(self):
         sender = ' '.join([part[0] for part in decode_header(self._mail['from'])])
@@ -57,6 +64,9 @@ class MailWrapper(QtCore.QObject):
     def _date(self):
         return self._mail['date']
 
+    def _unseenmail(self):
+        return self._unseen
+
     changed = QtCore.Signal()
 
     sender = QtCore.Property(unicode, _sender, notify=changed)
@@ -65,4 +75,5 @@ class MailWrapper(QtCore.QObject):
     date = QtCore.Property(unicode, _date, notify=changed)
     message = QtCore.Property(unicode, _message, notify=changed)
     uid = QtCore.Property(int, _mailuid, notify=changed)
+    unseen = QtCore.Property(bool, _unseenmail, notify=changed)
 

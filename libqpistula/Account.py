@@ -103,6 +103,7 @@ class MailAccount(QtCore.QObject):
         '''
         self.mail_check = MailCheckDeleteThread(self.inbox_username, self.inbox_password,
                                                 self.inbox_server, self.inbox_use_ssl)
+        self.unseen_mail = self.mail_check.unseen
         # create from server response a Qt/QML friendly model
         self.mail_check.finished.connect(self._create_mail_model)
         self.mails = self.mail_check.start()
@@ -110,7 +111,8 @@ class MailAccount(QtCore.QObject):
     # When MailCheckThread finished this function creates a Qt/QML model
     def _create_mail_model(self):
         response = self.mail_check.response
-        mails = [MailWrapper(id,response[id]['RFC822']) for id in reversed(response.keys())]
+        unseen = self.mail_check.unseen
+        mails = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(response.keys())]
         self.mails_model = MailListModel(mails)
         self.signal.receiving_done.emit()
 
@@ -165,6 +167,7 @@ class MailCheckDeleteThread(QtCore.QThread):
         self.server.login(self.user, self.passwd)
 
         self.response = {}
+        self.unseen = []
         self.uid = uid
         self.folder = folder
 
@@ -174,6 +177,7 @@ class MailCheckDeleteThread(QtCore.QThread):
             print "refreshing"
             # just show not deleted messages in the INBOX!
             messages = self.server.search(['NOT DELETED'])
+            self.unseen = self.server.search(['UNSEEN'])
             self.response = self.server.fetch(messages, ['RFC822'])
         if self.uid:
             print "deleting"

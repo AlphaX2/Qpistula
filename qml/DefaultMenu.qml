@@ -47,7 +47,6 @@ Rectangle {
                         app_window.state = ""
                         app_window.state = "show_acc_settings"
                     }
-
                 }
 
                 Button {

@@ -81,7 +81,6 @@ Rectangle { // complete main "page"
                 color: "black"
                 text: qp_mail_preview_listview.model.get_message(qp_mail_preview_listview.currentIndex)
                 font.pixelSize: full_content_listview.height / 40
-                //textFormat: Text.RichText
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 onLinkActivated: console.log(link + " link activated")
             }

@@ -11,6 +11,20 @@ Component {
         color: ListView.isCurrentItem ? "lightgrey" : "white"
         clip: true
 
+        Rectangle {
+            id: unseen_indicator
+
+            height: parent.height * 0.8
+            width: 4
+
+            anchors.left: mail_preview_column.left
+            anchors.verticalCenter: mail_preview_column.verticalCenter
+            anchors.leftMargin: 10
+
+            color: "steelblue"
+            visible: mails.unseen
+        }
+
         Column {
             id: mail_preview_column
             spacing: 5
@@ -30,7 +44,6 @@ Component {
                 font.pointSize: 10
                 font.bold: true
 
-                //textFormat: Text.RichText
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
             }
@@ -100,7 +113,6 @@ Component {
 
              onClicked: {
                  mail_listview.currentIndex = index
-                 //console.log(mails.message)
              }
         }
     }
