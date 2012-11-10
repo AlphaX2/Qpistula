@@ -1,6 +1,8 @@
+#-*- coding: utf-8 -*-
+
 from PySide import QtCore
 import email
-import chardet
+from email.header import decode_header
 
 class MailWrapper(QtCore.QObject):
     def __init__(self, uid, mail):
@@ -9,40 +11,33 @@ class MailWrapper(QtCore.QObject):
         self._mail = email.message_from_string(mail)
 
     def _sender(self):
-        return self._mail['from'].decode("utf-8")
- 
+        return ' '.join([part[0] for part in decode_header(self._mail['from'])]) 
+        #sender = []
+        #for part, charset in decode_header(self._mail['from']):
+        #   if charset:
+        #       sender.append(part.decode(charset))
+        #   else:
+        #       sender.append(part)
+        #return ' '.join(sender)   
+       
     def _subject(self):
-        return self._mail['subject'].decode("utf-8")
+        return ' '.join([part[0] for part in decode_header(self._mail['subject'])])   
+        #return self.getheader(self._mail['subject'])
 
+    def extract_message(self):
+        if self._mail.is_multipart():
+            return ""
+        else:
+            return unicode(self._mail.get_payload(decode=True).replace('\r',''))
+         
     def _preview(self):
-        return self.extract_message()[:150].decode("utf-8")
+        return self.extract_message()[:150]
 
     def _mailuid(self):
         return self._uid
 
     def _message(self):
-        return self.extract_message().decode("utf-8")
-
-    def extract_message(self):
-        text = ""
-        msg = self._mail
-        if msg.is_multipart():
-            html = True #None
-            for part in msg.get_payload():
-                if part.get_content_charset() is None:
-                    charset = chardet.detect(str(part))['encoding']
-                else:
-                    charset = part.get_content_charset()
-                if part.get_content_type() == 'text/plain':
-                    text = unicode(part.get_payload(decode=True),str(charset),"ignore").encode('utf8','replace')
-                if part.get_content_type() == 'text/html':
-                    html = unicode(part.get_payload(decode=True),str(charset),"ignore").encode('utf8','replace')
-            if html is None:
-                return text.strip()
-            else:
-                return html.strip()
-        else:
-            return msg.get_payload().decode("utf-8")
+        return self.extract_message()
 
     def _date(self):
         return self._mail['date']

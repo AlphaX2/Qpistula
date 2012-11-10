@@ -30,7 +30,7 @@ Component {
                 font.pointSize: 10
                 font.bold: true
 
-                textFormat: Text.RichText
+                //textFormat: Text.RichText
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
             }
