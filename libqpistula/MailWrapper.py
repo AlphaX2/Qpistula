@@ -13,10 +13,11 @@ class MailWrapper(QtCore.QObject):
 
     def _sender(self):
         sender = ' '.join([part[0] for part in decode_header(self._mail['from'])])
-        return unicode(sender.replace('\r',''))  
+        print "Sender:", sender
+        return sender.replace('\r','') 
        
     def _subject(self):
-        print decode_header(self._mail['subject'])
+        print "decode_header", decode_header(self._mail['subject'])
         charset = decode_header(self._mail['subject'])[0][1]
         if charset:
             return unicode(' '.join([part[0] for 
@@ -33,10 +34,13 @@ class MailWrapper(QtCore.QObject):
                 # that contains further parts... Message is organized like a tree
                 if part.get_content_type() in ['text/html']:
                     msg.append(part.get_payload(decode=True))
-            return u' '.join([part for part in msg])
+            return ' '.join([part for part in msg])
         else:
-            charset = self._mail['Content-Type'].replace('\r\n\t',' ').split('; charset=')[1]
-            charset = charset.lower().replace('"','')
+            charset = self._mail['Content-Type'].replace('\r\n\t',' ').split('; charset=')
+            if len(charset)>1:
+                charset = charset[1].lower().replace('"','')
+            else:
+                charset='utf-8'
             print charset
             return unicode(self._mail.get_payload(decode=True).replace('\r',''), charset)
             # QML Text Elements don't know '\r', so remove it
