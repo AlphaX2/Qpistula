@@ -20,6 +20,10 @@ class MailAccount(QtCore.QObject):
         self.mails_model = None
         self.mail_check = None
         self.mail_search = None
+
+        # A list holding all the MailWrapper objects which create the listmodel
+        self.mails = []
+
         self.account_name = 'Mein Account'
 
         self.signal = Signal()
@@ -101,19 +105,42 @@ class MailAccount(QtCore.QObject):
         Call this function to start the MailCheckThread receiving latest mails.
         And connect the receivingFinished signal to update your UI!
         '''
-        self.mail_check = MailCheckDeleteThread(self.inbox_username, self.inbox_password,
+        self.mail_check = MailCheckDeleteThread("receive", self.inbox_username, self.inbox_password,
                                                 self.inbox_server, self.inbox_use_ssl)
         self.unseen_mail = self.mail_check.unseen
         # create from server response a Qt/QML friendly model
         self.mail_check.finished.connect(self._create_mail_model)
-        self.mails = self.mail_check.start()
+        if not self.mail_check.isRunning():
+            self.mail_check.start()
+        else:
+            print "Thread is RUNNING!"
+
+    def refresh_mails(self, folder='INBOX'):
+        print "refresh mails"
+        self.mail_refresh = MailCheckDeleteThread("refresh", self.inbox_username, self.inbox_password,
+                                                self.inbox_server, self.inbox_use_ssl)
+        self.unseen_mail = self.mail_check.unseen
+        self.mail_refresh.finished.connect(self._refresh_mail_model)
+        if not self.mail_refresh.isRunning():
+            self.mail_refresh.start()
+        else:
+            print "Thread is RUNNING!"
 
     # When MailCheckThread finished this function creates a Qt/QML model
     def _create_mail_model(self):
         response = self.mail_check.response
         unseen = self.mail_check.unseen
-        mails = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(response.keys())]
-        self.mails_model = MailListModel(mails)
+        self.mails = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(response.keys())]
+        self.mails_model = MailListModel(self.mails)
+        self.signal.receiving_done.emit()
+
+    def _refresh_mail_model(self):
+        print "refresh mail model"
+        response = self.mail_refresh.response
+        unseen = self.mail_refresh.unseen
+        refreshed = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(response.keys())]
+        self.mails = refreshed + self.mails
+        self.mails_model = MailListModel(self.mails)
         self.signal.receiving_done.emit()
 
     def send_mail(self, destination, subject, content):
@@ -151,21 +178,26 @@ class MailAccount(QtCore.QObject):
     def get_mails_model(self):
         return self.mails_model
 
-    def delete_mails(self, uid):
-        self.mail_delete = MailCheckDeleteThread(self.inbox_username, self.inbox_password,
+    def delete_mails(self, uid, index):
+        self.mails.pop(index)
+        self.refresh_mails()
+
+        self.mail_delete = MailCheckDeleteThread("delete", self.inbox_username, self.inbox_password,
                                                  self.inbox_server, self.inbox_use_ssl,
                                                  uid=uid)
-        self.mail_delete.finished.connect(self.receive_mails)
         self.mail_delete.start()
 
 class MailCheckDeleteThread(QtCore.QThread):
-    def __init__(self, user, passwd, imap_server, use_ssl, uid=None, folder='INBOX'):
+    def __init__(self, modus, user, passwd, imap_server, use_ssl, uid=None, folder='INBOX'):
         QtCore.QThread.__init__(self)
         self.server = IMAPClient(imap_server, use_uid=True, ssl=use_ssl)
+
+        # holds the key word for what to do!
+        self.modus = modus
+
         self.user = user
         self.passwd = passwd
         self.server.login(self.user, self.passwd)
-
         self.response = {}
         self.unseen = []
         self.uid = uid
@@ -173,13 +205,19 @@ class MailCheckDeleteThread(QtCore.QThread):
 
     def run(self):
         self.server.select_folder(self.folder)
-        if not self.uid: # NO UID = NO MAIL TO DELETE
+        if self.modus == "receive":
             print "refreshing"
             # just show not deleted messages in the INBOX!
             messages = self.server.search(['NOT DELETED'])
-            self.unseen = self.server.search(['UNSEEN'])
+            self.unseen = self.server.search(['UNSEEN', 'RECENT'])
             self.response = self.server.fetch(messages, ['RFC822'])
-        if self.uid:
+
+        elif self.modus == "refresh":
+            messages = self.server.search(['UNSEEN'])
+            self.unseen = messages
+            self.response = self.server.fetch(messages, ['RFC822'])
+
+        elif self.modus == "delete":
             print "deleting"
             self.server.select_folder('INBOX')
             self.server.delete_messages(self.uid)

@@ -44,9 +44,10 @@ class MailActions(QtCore.QObject):
 
     @QtCore.Slot()
     def refresh_mails(self):
-        self.account.receive_mails()
+        self.account.refresh_mails()
 
     def update_ui(self):
+        print "update ui"
         self.mails_model = self.account.get_mails_model()
         qpistula.context.setContextProperty('mailListModel', self.mails_model)
 
@@ -85,11 +86,11 @@ class MailActions(QtCore.QObject):
     def send_mail(self, destination, subject, content):
         self.account.send_mail(destination, subject, content)
 
-    @QtCore.Slot(int)
-    def delete_mails(self, uid):
-        print "delete_mails (Qpistula.py):"
-        print "uid: "+str(uid)
-        self.account.delete_mails(uid)
+    @QtCore.Slot(int, int)
+    def delete_mails(self, uid, index):
+        # uid is for deleting the mail on the server, the index deletes the mail
+        # from our own MailListModel
+        self.account.delete_mails(uid, index)
 
 
 #Starten der App

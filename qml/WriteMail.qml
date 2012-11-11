@@ -189,6 +189,9 @@ Rectangle {
             height: app_window.height * 0.08
             buttonIcon: "img/delete.png"
             onClick: {
+                to_input.text = ""
+                subject.text = ""
+                mail_editor.text = ""
                 app_window.state = ""
             }
         }

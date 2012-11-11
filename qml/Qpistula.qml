@@ -12,7 +12,7 @@ Rectangle { // complete main "page"
     Rectangle { // mail preview list window
         id: qp_mail_preview
 
-        width: parent.width * 0.25
+        width: parent.width * 0.28
         height: parent.height * 0.91
 
         anchors.top: parent.top
@@ -120,6 +120,16 @@ Rectangle { // complete main "page"
                 else {app_window.state = "write_new_mail"}
             }
         }
+
+        Button {
+            id: search_button
+            width:  app_window.width * 0.08
+            height: app_window.height * 0.08
+            buttonIcon: "img/search.png"
+            onClick: {
+
+            }
+        }
     }
 
     Row { // reply, forward, delete button
@@ -182,8 +192,7 @@ Rectangle { // complete main "page"
                 var index = qp_mail_preview_listview.currentIndex
                 var model = qp_mail_preview_listview.model
                 var uid = model.get_uid(index)
-                console.log(uid)
-                mail.delete_mails(uid)
+                mail.delete_mails(uid, index)
             }
         }
     }
