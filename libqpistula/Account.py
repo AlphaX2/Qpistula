@@ -100,13 +100,14 @@ class MailAccount(QtCore.QObject):
         conf_list = [server_type, adress, in_user, in_pass, in_server, in_ssl, out_user, out_pass, out_server, out_ssl]
         return conf_list
 
-    def receive_mails(self, folder='INBOX'):
+    def receive_mails(self, folder='INBOX', load_more=False, count=0):
         '''
         Call this function to start the MailCheckThread receiving latest mails.
         And connect the receivingFinished signal to update your UI!
         '''
+
         self.mail_check = MailCheckDeleteThread("receive", self.inbox_username, self.inbox_password,
-                                                self.inbox_server, self.inbox_use_ssl)
+                                                self.inbox_server, self.inbox_use_ssl, load_more=load_more, count=count)
         self.unseen_mail = self.mail_check.unseen
         # create from server response a Qt/QML friendly model
         self.mail_check.finished.connect(self._create_mail_model)
@@ -130,7 +131,9 @@ class MailAccount(QtCore.QObject):
     def _create_mail_model(self):
         response = self.mail_check.response
         unseen = self.mail_check.unseen
-        self.mails = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(response.keys())]
+        mails_order = response.keys()
+        mails_order.sort()
+        self.mails = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(mails_order)]
         self.mails_model = MailListModel(self.mails)
         self.signal.receiving_done.emit()
 
@@ -138,7 +141,9 @@ class MailAccount(QtCore.QObject):
         print "refresh mail model"
         response = self.mail_refresh.response
         unseen = self.mail_refresh.unseen
-        refreshed = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(response.keys())]
+        mails_order = response.keys()
+        mails_order.sort()
+        refreshed = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(mails_order)]
         self.mails = refreshed + self.mails
         self.mails_model = MailListModel(self.mails)
         self.signal.receiving_done.emit()
@@ -188,7 +193,7 @@ class MailAccount(QtCore.QObject):
         self.mail_delete.start()
 
 class MailCheckDeleteThread(QtCore.QThread):
-    def __init__(self, modus, user, passwd, imap_server, use_ssl, uid=None, folder='INBOX'):
+    def __init__(self, modus, user, passwd, imap_server, use_ssl, uid=None, folder='INBOX', load_more=False, count=0):
         QtCore.QThread.__init__(self)
         self.server = IMAPClient(imap_server, use_uid=True, ssl=use_ssl)
 
@@ -202,20 +207,41 @@ class MailCheckDeleteThread(QtCore.QThread):
         self.unseen = []
         self.uid = uid
         self.folder = folder
+        self.more = None
+
+        if load_more:
+            print "LADE MEHR: JA!!!"
+            self.more = count+50
 
     def run(self):
         self.server.select_folder(self.folder)
         if self.modus == "receive":
-            print "refreshing"
+            print "receiving"
             # just show not deleted messages in the INBOX!
             messages = self.server.search(['NOT DELETED'])
             self.unseen = self.server.search(['UNSEEN', 'RECENT'])
-            self.response = self.server.fetch(messages, ['RFC822'])
+
+            if not self.more:
+                self.fetch_start = len(messages) - 50
+                if self.fetch_start < 0:
+                    self.fetch_start = 0
+                self.fetch_end = len(messages)
+
+            else:
+                self.fetch_start = len(messages) - self.more
+                if self.fetch_start < 0:
+                    self.fetch_start = 0
+                self.fetch_end = len(messages)
+
+            print self.fetch_start
+            print self.fetch_end
+
+            self.response = self.server.fetch(messages[self.fetch_start:self.fetch_end], ['RFC822'])
 
         elif self.modus == "refresh":
             messages = self.server.search(['UNSEEN'])
             self.unseen = messages
-            self.response = self.server.fetch(messages, ['RFC822'])
+            self.response = self.server.fetch(messages[self.fetch_start:self.fetch_end], ['RFC822'])
 
         elif self.modus == "delete":
             print "deleting"

@@ -32,6 +32,41 @@ Rectangle { // complete main "page"
             model: mailListModel
 
             delegate: Mail_Preview_Delegator{}
+
+            onMovementEnded: {
+                if(atYEnd) {
+                    console.log("end of list");
+                    qp_mail_preview_listview.footer = loadmoreButton
+                }
+            }
+        }
+
+        Component {
+            id: loadmoreButton
+
+            Rectangle {
+                width: parent.width
+                height: qp_main_window.height / 10
+                color: "lightgrey"
+                border.color: "darkgrey"
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "+ load more"
+                    color: "steelblue"
+                    font.bold: true
+                }
+
+                MouseArea{
+                    id: loadmoreClick
+                    anchors.fill: parent
+
+                    onClicked: {
+                        console.log("load more mails!");
+                        mail.load_more_mails(qp_mail_preview_listview.count)
+                    }
+                }
+            }
         }
 
         Scrollbar {
