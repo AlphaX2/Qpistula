@@ -32,6 +32,12 @@ Rectangle { // complete main "page"
             model: mailListModel
 
             delegate: Mail_Preview_Delegator{}
+            // Just placeholder for real one!
+            footer: Rectangle {
+                        height: qp_main_window.height / 10
+                        width: parent.width
+                        color: "lightgrey"
+            }
 
             onMovementEnded: {
                 if(atYEnd) {
@@ -63,7 +69,9 @@ Rectangle { // complete main "page"
 
                     onClicked: {
                         console.log("load more mails!");
-                        mail.load_more_mails(qp_mail_preview_listview.count)
+                        var count = qp_mail_preview_listview.count
+                        mail.load_more_mails(count)
+                        qp_mail_preview_listview.currentIndex = count-1
                     }
                 }
             }

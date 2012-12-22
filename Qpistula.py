@@ -48,7 +48,8 @@ class MailActions(QtCore.QObject):
 
     @QtCore.Slot(int)
     def load_more_mails(self, last_count):
-        self.account.receive_mails(load_more=True, count=last_count)
+        #self.account.receive_mails(load_more=True, count=last_count)
+        self.account.load_more_mails(last_count=last_count, add_new=50)
 
     def update_ui(self):
         print "update ui"

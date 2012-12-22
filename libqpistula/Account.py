@@ -12,6 +12,9 @@ from imapclient import IMAPClient
 from MailWrapper import MailWrapper
 from MailListModel import MailListModel
 
+
+
+
 class MailAccount(QtCore.QObject):
     ''' holds account data and manage mail actions'''
     def __init__(self):
@@ -38,9 +41,11 @@ class MailAccount(QtCore.QObject):
             self.default_conf()
             self.read_conf()
 
+
     def save_conf(self):
         with open(os.path.expanduser('~/.config/qpistula.cfg'), 'wb') as configfile:
             self.settings.write(configfile)
+
 
     def read_conf(self):
         self.settings.readfp(open(os.path.expanduser('~/.config/qpistula.cfg'), 'rwb'))
@@ -55,6 +60,7 @@ class MailAccount(QtCore.QObject):
         self.smtp_password = self.settings.get(self.account_name, 'smtp_password', '')
         self.smtp_use_ssl = self.settings.get(self.account_name, 'smtp_use_ssl', 'False')
         self.update_interval = self.settings.getint(self.account_name, 'update_interval')
+
 
     # to generate plain config-file, should be deleted when settings dialog works
     def default_conf(self):
@@ -72,6 +78,7 @@ class MailAccount(QtCore.QObject):
         self.settings.set(self.account_name, 'update_interval','10')
         self.save_conf()
 
+
     def save_server_settings(self, server_type='', mail_adress='', user='', passwd='', server='', ssl='', smtp_username='', smtp_password= '', smtp_server= '', smtp_use_ssl = False):
         self.settings.set(self.account_name, 'inbox_server_type', server_type)
         self.settings.set(self.account_name, 'mail_adress', mail_adress)
@@ -84,6 +91,7 @@ class MailAccount(QtCore.QObject):
         self.settings.set(self.account_name, 'smtp_password', smtp_password)
         self.settings.set(self.account_name, 'smtp_use_ssl', smtp_use_ssl)
         self.save_conf()
+
 
     def get_conf(self):
         server_type = self.inbox_server_type
@@ -100,14 +108,18 @@ class MailAccount(QtCore.QObject):
         conf_list = [server_type, adress, in_user, in_pass, in_server, in_ssl, out_user, out_pass, out_server, out_ssl]
         return conf_list
 
-    def receive_mails(self, folder='INBOX', load_more=False, count=0):
+
+    def receive_mails(self, folder='INBOX'):
         '''
         Call this function to start the MailCheckThread receiving latest mails.
         And connect the receivingFinished signal to update your UI!
         '''
 
-        self.mail_check = MailCheckDeleteThread("receive", self.inbox_username, self.inbox_password,
-                                                self.inbox_server, self.inbox_use_ssl, load_more=load_more, count=count)
+        self.mail_check = MailCheckDeleteThread("receive",
+                                                self.inbox_username,
+                                                self.inbox_password,
+                                                self.inbox_server,
+                                                self.inbox_use_ssl)
         self.unseen_mail = self.mail_check.unseen
         # create from server response a Qt/QML friendly model
         self.mail_check.finished.connect(self._create_mail_model)
@@ -115,6 +127,7 @@ class MailAccount(QtCore.QObject):
             self.mail_check.start()
         else:
             print "Thread is RUNNING!"
+
 
     def refresh_mails(self, folder='INBOX'):
         print "refresh mails"
@@ -127,6 +140,24 @@ class MailAccount(QtCore.QObject):
         else:
             print "Thread is RUNNING!"
 
+
+    def load_more_mails(self, last_count, add_new, folder='INBOX'):
+        print "load more mails function"
+        self.mail_load_more = MailCheckDeleteThread("more",
+                                                    self.inbox_username,
+                                                    self.inbox_password,
+                                                    self.inbox_server,
+                                                    self.inbox_use_ssl,
+                                                    last_count = last_count,
+                                                    add_new = add_new)
+        self.unseen_mail = self.mail_check.unseen
+        self.mail_load_more.finished.connect(self._add_to_mail_model)
+        if not self.mail_load_more.isRunning():
+            self.mail_load_more.start()
+        else:
+            print "Thread is RUNNING!"
+
+
     # When MailCheckThread finished this function creates a Qt/QML model
     def _create_mail_model(self):
         response = self.mail_check.response
@@ -136,6 +167,7 @@ class MailAccount(QtCore.QObject):
         self.mails = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(mails_order)]
         self.mails_model = MailListModel(self.mails)
         self.signal.receiving_done.emit()
+
 
     def _refresh_mail_model(self):
         print "refresh mail model"
@@ -147,6 +179,22 @@ class MailAccount(QtCore.QObject):
         self.mails = refreshed + self.mails
         self.mails_model = MailListModel(self.mails)
         self.signal.receiving_done.emit()
+
+
+    def _add_to_mail_model(self):
+        print "add loaded mails to mail model"
+        response = self.mail_load_more.response
+        unseen = self.mail_load_more.unseen
+        mails_order = response.keys()
+        mails_order.sort()
+        loaded_more = [MailWrapper(id, unseen, response[id]['RFC822']) for id in reversed(mails_order)]
+
+        print loaded_more
+
+        self.mails += loaded_more
+        self.mails_model = MailListModel(self.mails)
+        self.signal.receiving_done.emit()
+
 
     def send_mail(self, destination, subject, content):
         # the accounts mail adress
@@ -180,8 +228,10 @@ class MailAccount(QtCore.QObject):
         except Exception, exc:
             sys.exit( "mail failed; %s" % str(exc) ) # give a error message
 
+
     def get_mails_model(self):
         return self.mails_model
+
 
     def delete_mails(self, uid, index):
         self.mails.pop(index)
@@ -192,8 +242,11 @@ class MailAccount(QtCore.QObject):
                                                  uid=uid)
         self.mail_delete.start()
 
+
+
+
 class MailCheckDeleteThread(QtCore.QThread):
-    def __init__(self, modus, user, passwd, imap_server, use_ssl, uid=None, folder='INBOX', load_more=False, count=0):
+    def __init__(self, modus, user, passwd, imap_server, use_ssl, uid=None, folder='INBOX', last_count=0, add_new=0):
         QtCore.QThread.__init__(self)
         self.server = IMAPClient(imap_server, use_uid=True, ssl=use_ssl)
 
@@ -207,11 +260,9 @@ class MailCheckDeleteThread(QtCore.QThread):
         self.unseen = []
         self.uid = uid
         self.folder = folder
-        self.more = None
+        self.last_count = last_count
+        self.add_new = add_new
 
-        if load_more:
-            print "LADE MEHR: JA!!!"
-            self.more = count+50
 
     def run(self):
         self.server.select_folder(self.folder)
@@ -220,28 +271,19 @@ class MailCheckDeleteThread(QtCore.QThread):
             # just show not deleted messages in the INBOX!
             messages = self.server.search(['NOT DELETED'])
             self.unseen = self.server.search(['UNSEEN', 'RECENT'])
-
-            if not self.more:
-                self.fetch_start = len(messages) - 50
-                if self.fetch_start < 0:
-                    self.fetch_start = 0
-                self.fetch_end = len(messages)
-
-            else:
-                self.fetch_start = len(messages) - self.more
-                if self.fetch_start < 0:
-                    self.fetch_start = 0
-                self.fetch_end = len(messages)
-
-            print self.fetch_start
-            print self.fetch_end
-
-            self.response = self.server.fetch(messages[self.fetch_start:self.fetch_end], ['RFC822'])
+            self.response = self.server.fetch(messages[-50:], ['RFC822'])
 
         elif self.modus == "refresh":
             messages = self.server.search(['UNSEEN'])
             self.unseen = messages
-            self.response = self.server.fetch(messages[self.fetch_start:self.fetch_end], ['RFC822'])
+            self.response = self.server.fetch(messages, ['RFC822'])
+
+        elif self.modus == "more":
+            messages = self.server.search(['NOT DELETED'])
+            # Just fetch the exactly given amount of mails and add them to the list
+            fetch_start = -(self.last_count+self.add_new)
+            fetch_end = -self.last_count
+            self.response = self.server.fetch(messages[fetch_start:fetch_end], ['RFC822'])
 
         elif self.modus == "delete":
             print "deleting"
