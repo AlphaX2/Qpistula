@@ -100,10 +100,60 @@ Rectangle { // complete main "page"
         border.color: "darkgrey"
         border.width: 1
 
+        Rectangle {
+           id: mail_info_bar
+
+           anchors.top: parent.top
+           anchors.left: parent.left
+
+           height: parent.height * 0.15
+           width: parent.width
+
+           color: "lightgrey"
+
+           border.color: "darkgrey"
+
+           Column {
+               id: informations
+
+               spacing: 5
+
+               height: parent.height
+
+               anchors.left: parent.left
+               anchors.leftMargin: 40
+               anchors.top: parent.top
+               anchors.topMargin: 10
+
+               Text {
+                   id: mail_info_from
+
+                   text: "<b>From</b>: "+qp_mail_preview_listview.model.get_sender(qp_mail_preview_listview.currentIndex)
+                   font.pixelSize: parent.height * 0.15
+               }
+
+               Text {
+                   id: mail_info_subject
+
+                   text: "<b>Subject</b>: "+qp_mail_preview_listview.model.get_subject(qp_mail_preview_listview.currentIndex)
+                   font.pixelSize: parent.height * 0.15
+               }
+
+               Text {
+                   id: mail_info_date
+
+                   text: "<b>Date</b>: "+qp_mail_preview_listview.model.get_date(qp_mail_preview_listview.currentIndex)
+                   font.pixelSize: parent.height * 0.15
+               }
+           }
+        }
+
         Flickable {
             id: full_content_listview
 
-            anchors.centerIn: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: mail_info_bar.bottom
+            anchors.topMargin: 10
 
             width: parent.width * 0.95
             height: parent.height * 0.95
@@ -170,7 +220,8 @@ Rectangle { // complete main "page"
             height: app_window.height * 0.08
             buttonIcon: "img/search.png"
             onClick: {
-
+                if (app_window.state == "show_search") { app_window.state = ""}
+                else {app_window.state = "show_search"}
             }
         }
     }

@@ -35,6 +35,15 @@ Rectangle {
         opacity: 0
     }
 
+    Search {
+        id: search
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: -height
+
+        opacity: 0
+    }
+
 
     states: [
         State {
@@ -51,6 +60,11 @@ Rectangle {
         State {
             name: "show_acc_settings"
             PropertyChanges {target: acc_settings; opacity: 1.0; y: 0 }
+        },
+
+        State {
+            name: "show_search"
+            PropertyChanges {target: search; opacity: 1.0; y: 0 }
         }
     ]
 
@@ -88,6 +102,20 @@ Rectangle {
 
         Transition {
             from: "show_acc_settings"
+            to: ""
+            PropertyAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
+            PropertyAnimation { properties: "opacity"; duration: 2000}
+        },
+
+        Transition {
+            from: ""
+            to: "show_search"
+            PropertyAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
+            PropertyAnimation { properties: "opacity"; duration: 250}
+        },
+
+        Transition {
+            from: "show_search"
             to: ""
             PropertyAnimation { properties: "y"; easing.type: Easing.InOutQuad; duration: 500}
             PropertyAnimation { properties: "opacity"; duration: 2000}

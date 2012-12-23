@@ -29,7 +29,7 @@ Component {
             id: mail_preview_column
             spacing: 5
 
-            width: parent.width
+            width: parent.width * 0.95
 
             Text {
                 id: from_text
@@ -51,7 +51,7 @@ Component {
             Text {
                 id: subject_text
 
-                width: parent.width
+                width: parent.width * 0.95
 
                 anchors.left: parent.left
                 anchors.leftMargin: 20
@@ -68,7 +68,7 @@ Component {
             Text {
                 id: preview_text
 
-                width: parent.width
+                width: parent.width * 0.95
 
                 anchors.left: parent.left
                 anchors.leftMargin: 20
@@ -85,7 +85,7 @@ Component {
             Text {
                 id: time_stemp
 
-                width: parent.width
+                width: parent.width * 0.95
 
                 anchors.left: parent.left
                 anchors.leftMargin: 20

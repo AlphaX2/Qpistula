@@ -17,10 +17,10 @@ Rectangle {
     Rectangle { //adress_data_window
         id: adress_data_window
 
-        width: parent.width * 0.25
+        width: parent.width * 0.28
         height: parent.height
 
-        color: "white"
+        color: "lightgrey"
 
         border.color: "darkgrey"
         border.width: 1
