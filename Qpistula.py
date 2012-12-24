@@ -36,25 +36,43 @@ class MailActions(QtCore.QObject):
         self.mails_model = None
         self.account = MailAccount()
         self.account.signal.receiving_done.connect(self.update_ui)
+        self._loading_indicator_runs = None
 
         try:
+            self._loading_indicator_runs = True
+            print self._loading_indicator_runs
+            self.changed.emit()
             self.account.receive_mails()
         except:
             print "ERROR: NO CONNECTION, CHECK YOUR SETTINGS!"
 
+
     @QtCore.Slot()
     def refresh_mails(self):
+        self._loading_indicator_runs = True
+        print self._loading_indicator_runs
+        self.changed.emit()
         self.account.refresh_mails()
+
 
     @QtCore.Slot(int)
     def load_more_mails(self, last_count):
-        #self.account.receive_mails(load_more=True, count=last_count)
+        self._loading_indicator_runs = True
+        print self._loading_indicator_runs
+        self.changed.emit()
         self.account.load_more_mails(last_count=last_count, add_new=50)
 
+
     def update_ui(self):
-        print "update ui"
+        print
+        print "UPDATE_UI!"
+        print
         self.mails_model = self.account.get_mails_model()
         qpistula.context.setContextProperty('mailListModel', self.mails_model)
+        self._loading_indicator_runs = False
+        print self._loading_indicator_runs
+        self.changed.emit()
+
 
     @QtCore.Slot(str, str, str, str, str, bool, str, str, str, bool)
     def save_server_settings(self, server_type='', mail_adress='',
@@ -93,9 +111,25 @@ class MailActions(QtCore.QObject):
 
     @QtCore.Slot(int, int)
     def delete_mails(self, uid, index):
+        self._loading_indicator_runs = True
+        print self._loading_indicator_runs
+        self.changed.emit()
         # uid is for deleting the mail on the server, the index deletes the mail
         # from our own MailListModel
         self.account.delete_mails(uid, index)
+
+    def get_indicator_status(self):
+        if self._loading_indicator_runs:
+            return "True"
+        else:
+            return "False"
+
+    @QtCore.Signal
+    def changed(self):
+        print "indicator_changed signal is emited"
+        print "status: "+str(self._loading_indicator_runs)
+
+    indicator_running = QtCore.Property(unicode, get_indicator_status, notify=changed)
 
 
 #Starten der App

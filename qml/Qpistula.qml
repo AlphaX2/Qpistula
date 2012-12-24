@@ -68,7 +68,6 @@ Rectangle { // complete main "page"
                     anchors.fill: parent
 
                     onClicked: {
-                        console.log("load more mails!");
                         var count = qp_mail_preview_listview.count
                         mail.load_more_mails(count)
                         qp_mail_preview_listview.currentIndex = count-1
@@ -185,6 +184,34 @@ Rectangle { // complete main "page"
             anchors.left: full_content_listview.right
             width: 3
             flickArea: full_content_listview
+        }
+
+        Image {
+            id: loading_indicator
+
+            anchors.centerIn: parent
+
+            height: 100
+            width: 100
+
+            source: "img/loading_spin.png"
+            visible: mail.indicator_running === "False" ? false : true
+
+            NumberAnimation on rotation {
+                     running: loading_indicator.visible; from: 0; to: 360; loops: Animation.Infinite; duration: 1000
+                }
+        }
+
+        Text {
+            id: loading_text
+            anchors.top: loading_indicator.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.topMargin: 10
+
+            text: "loading"
+            color: "darkgrey"
+            font.pixelSize: full_content_listview.height / 30
+            visible: loading_indicator.visible
         }
     }
 
