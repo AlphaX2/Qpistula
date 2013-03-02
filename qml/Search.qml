@@ -4,8 +4,8 @@ import "components"
 Rectangle {
     id: search_window
 
-    width: 1280 //parent.width
-    height: 720 //parent.height
+    width: parent.width
+    height: parent.height
 
     color: "lightgrey"
 

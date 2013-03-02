@@ -155,7 +155,7 @@ Rectangle { // complete main "page"
             anchors.topMargin: 10
 
             width: parent.width * 0.95
-            height: parent.height * 0.95
+            height: (parent.height * 0.95) - mail_info_bar.height
             contentHeight: content_text.height
             contentWidth: content_text.width
             clip: true
@@ -165,7 +165,7 @@ Rectangle { // complete main "page"
             Text {
                 id: content_text
 
-                width: qp_mail_full_content.width * 0.95
+                width: qp_mail_full_content.width * 0.90
 
                 anchors.left: parent.left
                 anchors.leftMargin: 20
